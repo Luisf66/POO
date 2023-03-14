@@ -2,10 +2,13 @@ class Produto{
   double preco;
   String nome;
   Produto ({required this.preco, required this.nome });
+  @override
+  String toString() {
+    return 'Produto{nome: $nome, preço: $preco}';
+  }
 }
 
-Produto um = Produto (nome: "Cachaça", preco:10);
-Produto dois = Produto (nome: "Arroz", preco:5);
+
 
 class Item{
   double quantidade;
@@ -33,9 +36,8 @@ void main() {
   Venda venda = Venda(data: "14/03/2023", itens: [item1, item2]);
 
   print("Itens da venda:");
-  for (var item in venda.itens) {
-    print("${item.quantidade} ${item.produto.nome} = ${item.total()}");
-  }
+  venda.itens.forEach((item) => print("${item.quantidade} ${item.produto.nome} = ${item.total()}"));
 
   print("Preço total da venda: ${venda.total()}");
- }
+
+}
