@@ -1,0 +1,41 @@
+class Produto{
+  double preco;
+  String nome;
+  Produto ({required this.preco, required this.nome });
+}
+
+Produto um = Produto (nome: "Cachaça", preco:10);
+Produto dois = Produto (nome: "Arroz", preco:5);
+
+class Item{
+  double quantidade;
+  Produto produto;
+  Item ({required this.quantidade, required this.produto});
+  double total()=>quantidade*produto.preco;
+}
+
+class Venda{
+  String data; 
+  List<Item> itens;
+  Venda ({required this.data, required this. itens}); 
+  double total()=>
+    itens.fold (0, (sum, e)=> sum+e.total());
+}
+
+
+void main() {
+  Produto um = Produto(nome: "Cachaça", preco: 10);
+  Produto dois = Produto(nome: "Arroz", preco: 5);
+
+  Item item1 = Item(quantidade: 2, produto: um);
+  Item item2 = Item(quantidade: 3, produto: dois);
+
+  Venda venda = Venda(data: "14/03/2023", itens: [item1, item2]);
+
+  print("Itens da venda:");
+  for (var item in venda.itens) {
+    print("${item.quantidade} ${item.produto.nome} = ${item.total()}");
+  }
+
+  print("Preço total da venda: ${venda.total()}");
+ }
