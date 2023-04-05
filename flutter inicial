@@ -1,48 +1,24 @@
 import 'package:flutter/material.dart';
 
-void main(){
+void main() {
   MaterialApp app = MaterialApp(
-    theme: ThemeData(
-      primarySwatch: Colors.cyan
-    ),
-    home: Scaffold(
-      appBar: AppBar(
-        title: Text("Tela inicial de testes")
+      theme: ThemeData(
+        primarySwatch: Colors.cyan,
       ),
-      body: Center(
-        child: Column(
-          children:[
-            Text("Teste 1."),
-            Text("Teste 2."),
-            Text("Teste 3."),
-            Text("Teste 4."),
-          ]
-        )
-      ),
-      floatingActionButton: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          FloatingActionButton(
-            tooltip: 'Botão 1/3',
-            onPressed: null,
-            child: Icon(Icons.abc),
+      home: Scaffold(
+        appBar: AppBar(title: Text("Tela inicial")),
+        body: Center(
+          child: Column(
+            children: [
+              Text("Texto 1"),
+              Text("Texto 2"),
+              Text("Texto 3"),
+              Text("Texto 4"),
+              Text("Texto 5")
+            ],
           ),
-          SizedBox(height: 20,width: 210),
-          FloatingActionButton(
-            tooltip: 'Botão 2/3',
-            onPressed: null,
-            child: Icon(Icons.abc),
-          ),
-           SizedBox(height: 20,width: 210),
-           FloatingActionButton(
-            tooltip: 'Botão 3/3',
-            onPressed: null,
-            child: Icon(Icons.abc),
-          ),
-        ],
-      ),
-    )
-  );
-  
+        ),
+        bottomNavigationBar: Text("Botão teste"),
+      ));
   runApp(app);
 }
