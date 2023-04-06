@@ -1,30 +1,44 @@
 import 'package:flutter/material.dart';
 
+class MinhaCaixa extends StatelessWidget {
+  MinhaCaixa();
+
+    @override Widget build(BuildContext){
+    return BottomNavigationBar(
+      items: const [BottomNavigationBarItem(
+        label: "Home",
+        icon: Icon(Icons.home),
+      ),
+      BottomNavigationBarItem(
+        label: "Localização",
+        icon: Icon(Icons.location_on)),
+      BottomNavigationBarItem(
+        label: "Android",
+        icon: Icon(Icons.android))
+      ]);
+  }
+}
+
 void main() {
   MaterialApp app = MaterialApp(
       theme: ThemeData(
-        primarySwatch: Colors.cyan,
-      ),
+          brightness: Brightness.dark,
+          primaryColor: Colors.cyan,
+          fontFamily: 'Georgia'),
       home: Scaffold(
         appBar: AppBar(title: Text("Tela inicial")),
         body: Center(
           child: Column(
             children: [
-              Text("Texto 1"),
-              Text("Texto 2"),
-              Text("Texto 3"),
-              Text("Texto 4"),
-              Text("Texto 5")
+              Expanded(child: Text("Texto 1")),
+              Expanded(child: Text("Texto 2")),
+              Expanded(child: Text("Texto 3")),
+              Expanded(child: Text("Texto 4")),
+              Expanded(child: Text("Texto 5")),
             ],
           ),
         ),
-        bottomNavigationBar: ElevatedButton.icon(
-          label: Text("Botão 1"),
-          icon: Icon(Icons.android),
-          onPressed: () {
-            print("Pressionado");
-          },
-        ),
-      ));
+        bottomNavigationBar: MinhaCaixa()),
+      );
   runApp(app);
 }
