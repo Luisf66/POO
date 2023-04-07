@@ -3,42 +3,47 @@ import 'package:flutter/material.dart';
 class MinhaCaixa extends StatelessWidget {
   MinhaCaixa();
 
-    @override Widget build(BuildContext){
-    return BottomNavigationBar(
-      items: const [BottomNavigationBarItem(
+  @override
+  Widget build(BuildContext) {
+    return BottomNavigationBar(items: const [
+      BottomNavigationBarItem(
         label: "Home",
         icon: Icon(Icons.home),
       ),
       BottomNavigationBarItem(
-        label: "Localização",
-        icon: Icon(Icons.location_on)),
+          label: "Localização", icon: Icon(Icons.location_on)),
       BottomNavigationBarItem(
-        label: "Android",
-        icon: Icon(Icons.android))
-      ]);
+          label: "Configurações", icon: Icon(Icons.settings)),
+    ]);
   }
 }
 
 void main() {
   MaterialApp app = MaterialApp(
-      theme: ThemeData(
-          brightness: Brightness.dark,
-          primaryColor: Colors.cyan,
-          fontFamily: 'Georgia'),
-      home: Scaffold(
-        appBar: AppBar(title: Text("Tela inicial")),
+    theme: ThemeData(
+        brightness: Brightness.light,
+        primaryColor: Colors.black,
+        fontFamily: 'TimesNewRoman'),
+    home: Scaffold(
+        backgroundColor: Colors.white,
+        appBar: AppBar(
+            title: Text(
+          "Login",
+          style: TextStyle(fontStyle: FontStyle.italic, color: Colors.white),
+        )),
         body: Center(
           child: Column(
             children: [
-              Expanded(child: Text("Texto 1")),
-              Expanded(child: Text("Texto 2")),
-              Expanded(child: Text("Texto 3")),
-              Expanded(child: Text("Texto 4")),
-              Expanded(child: Text("Texto 5")),
+              Container(
+                width: 350,
+                height: 350,
+                child: Image.network(
+                    'https://canalcienciascriminais.com.br/wp-content/uploads/2018/11/google-maps.png'),
+              ),
             ],
           ),
         ),
         bottomNavigationBar: MinhaCaixa()),
-      );
+  );
   runApp(app);
 }
