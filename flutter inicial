@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class MinhaCaixa extends StatelessWidget {
-  MinhaCaixa();
+class BarraInferior extends StatelessWidget {
+  BarraInferior();
 
   @override
   Widget build(BuildContext) {
@@ -40,10 +40,27 @@ void main() {
                 child: Image.network(
                     'https://canalcienciascriminais.com.br/wp-content/uploads/2018/11/google-maps.png'),
               ),
+              DataTable(
+                sortColumnIndex: 0,
+                sortAscending: true,
+                columns: [
+                DataColumn(label: Text("Registro 1")),
+                DataColumn(label: Text("Registro 2")),
+              ], 
+              rows: [
+                DataRow(cells: [
+                  DataCell(Text("Usuário 1..."),showEditIcon: true),
+                  DataCell(Text("Informação 1"),showEditIcon: true),
+                ]),
+                DataRow(cells: [
+                  DataCell(Text("Usuário 2..."),showEditIcon: true),
+                  DataCell(Text("Informação 2"),showEditIcon: true),
+                ]),
+              ])
             ],
           ),
         ),
-        bottomNavigationBar: MinhaCaixa()),
+        bottomNavigationBar: BarraInferior()),
   );
   runApp(app);
 }
