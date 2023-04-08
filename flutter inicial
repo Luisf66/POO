@@ -21,11 +21,11 @@ class BarraInferior extends StatelessWidget {
 void main() {
   MaterialApp app = MaterialApp(
     theme: ThemeData(
-        brightness: Brightness.light,
-        primaryColor: Colors.black,
+        brightness: Brightness.dark,
+        primaryColor: Colors.cyan,
         fontFamily: 'TimesNewRoman'),
     home: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.white60,
         appBar: AppBar(
             title: Text(
           "Login",
