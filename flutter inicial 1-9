@@ -7,14 +7,73 @@ class BarraInferior extends StatelessWidget {
   Widget build(BuildContext) {
     return BottomNavigationBar(items: const [
       BottomNavigationBarItem(
-        label: "Home",
+        label: "Conta",
         icon: Icon(Icons.home),
       ),
       BottomNavigationBarItem(
-          label: "Localização", icon: Icon(Icons.location_on)),
+          label: "Pedidos", icon: Icon(Icons.assignment)),
       BottomNavigationBarItem(
           label: "Configurações", icon: Icon(Icons.settings)),
     ]);
+  }
+}
+
+class Tabela extends StatelessWidget {
+  const Tabela({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return DataTable(
+      columns: const <DataColumn>[
+        DataColumn(
+          label: Expanded(
+            child: Text(
+              'Nome',
+              style: TextStyle(fontStyle: FontStyle.italic),
+            ),
+          ),
+        ),
+        DataColumn(
+          label: Expanded(
+            child: Text(
+              'Estilo',
+              style: TextStyle(fontStyle: FontStyle.italic),
+            ),
+          ),
+        ),
+        DataColumn(
+          label: Expanded(
+            child: Text(
+              'IBU',
+              style: TextStyle(fontStyle: FontStyle.italic),
+            ),
+          ),
+        ),
+      ],
+      rows: const <DataRow>[
+        DataRow(
+          cells: <DataCell>[
+            DataCell(Text(' La Fin Du Monde')),
+            DataCell(Text('Bock')),
+            DataCell(Text('65')),
+          ],
+        ),
+        DataRow(
+          cells: <DataCell>[
+            DataCell(Text('Sapporo Premium')),
+            DataCell(Text('Sour Ale')),
+            DataCell(Text('54')),
+          ],
+        ),
+        DataRow(
+          cells: <DataCell>[
+            DataCell(Text('Duvel')),
+            DataCell(Text('Pilsner')),
+            DataCell(Text('82')),
+          ],
+        ),
+      ],
+    );
   }
 }
 
@@ -22,41 +81,25 @@ void main() {
   MaterialApp app = MaterialApp(
     theme: ThemeData(
         brightness: Brightness.dark,
-        primaryColor: Colors.cyan,
+        primaryColor: Colors.green,
         fontFamily: 'TimesNewRoman'),
     home: Scaffold(
         backgroundColor: Colors.white60,
         appBar: AppBar(
             title: Text(
-          "Login",
+          "Cervejas",
           style: TextStyle(fontStyle: FontStyle.italic, color: Colors.white),
         )),
         body: Center(
           child: Column(
             children: [
               Container(
-                width: 350,
-                height: 350,
+                width: 300,
+                height: 300,
                 child: Image.network(
-                    'https://canalcienciascriminais.com.br/wp-content/uploads/2018/11/google-maps.png'),
+                    'https://cervejariaantuerpia.com.br/wp-content/uploads/2022/05/4.jpg'),
               ),
-              DataTable(
-                sortColumnIndex: 0,
-                sortAscending: true,
-                columns: [
-                DataColumn(label: Text("Registro 1")),
-                DataColumn(label: Text("Registro 2")),
-              ], 
-              rows: [
-                DataRow(cells: [
-                  DataCell(Text("Usuário 1..."),showEditIcon: true),
-                  DataCell(Text("Informação 1"),showEditIcon: true),
-                ]),
-                DataRow(cells: [
-                  DataCell(Text("Usuário 2..."),showEditIcon: true),
-                  DataCell(Text("Informação 2"),showEditIcon: true),
-                ]),
-              ])
+              Tabela(),
             ],
           ),
         ),
