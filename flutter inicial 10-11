@@ -1,0 +1,64 @@
+import 'package:flutter/material.dart';
+
+class BarraInferior extends StatelessWidget {
+  BarraInferior();
+
+  @override
+  Widget build(BuildContext) {
+    return BottomNavigationBar(items: const [
+      BottomNavigationBarItem(
+        label: "Home",
+        icon: Icon(Icons.home),
+      ),
+      BottomNavigationBarItem(
+          label: "Localização", icon: Icon(Icons.location_on)),
+      BottomNavigationBarItem(
+          label: "Configurações", icon: Icon(Icons.settings)),
+    ]);
+  }
+}
+
+void main() {
+  MaterialApp app = MaterialApp(
+    theme: ThemeData(
+        brightness: Brightness.dark,
+        primaryColor: Colors.cyan,
+        fontFamily: 'TimesNewRoman'),
+    home: Scaffold(
+        backgroundColor: Colors.white60,
+        appBar: AppBar(
+            title: Text(
+          "Cervejas",
+          style: TextStyle(fontStyle: FontStyle.italic, color: Colors.yellow),
+        )),
+        body: Center(
+          child: Column(
+            children: [
+              Container(
+                width: 500,
+                height: 350,
+                child: Image.network(
+                    'https://canalcienciascriminais.com.br/wp-content/uploads/2018/11/google-maps.png'),
+              ),
+              DataTable(columns: [
+                DataColumn(label: Text("Registro 1"), numeric: true),
+                DataColumn(label: Text("Registro 2"), numeric: true),
+                //DataColumn(label: Text("Registro 3"),
+                //numeric: true),
+              ], rows: [
+                DataRow(selected: true, cells: [
+                  DataCell(Text("Usuário 1..."), placeholder: true),
+                  DataCell(Text("Informação 1"), showEditIcon: true),
+                ]),
+                DataRow(selected: true, cells: [
+                  DataCell(Text("Usuário 2..."), placeholder: true),
+                  DataCell(Text("Informação 2"), showEditIcon: true),
+                ]),
+              ])
+            ],
+          ),
+        ),
+        bottomNavigationBar: BarraInferior()),
+  );
+  runApp(app);
+}
