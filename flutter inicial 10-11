@@ -24,12 +24,7 @@ class Corpo_do_app extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
         backgroundColor: Colors.white60,
-        appBar: AppBar(
-          title: Text(
-            "Cervejas",
-            style: TextStyle(fontStyle: FontStyle.italic, color: Colors.white),
-          ),
-        ),
+        appBar: Barra_do_app(title: Text("App")),
         body: Center(
           child: Column(
             children: [
@@ -48,6 +43,10 @@ class Corpo_do_app extends StatelessWidget {
         ),
         bottomNavigationBar: BarraInferior());
   }
+}
+
+class Barra_do_app extends AppBar{
+  Barra_do_app({super.title});
 }
 
 class Tabela extends StatelessWidget {
