@@ -4,7 +4,7 @@ class BarraInferior extends StatelessWidget {
   BarraInferior();
 
   @override
-  Widget build(BuildContext) {
+  Widget build(BuildContext context) {
     return BottomNavigationBar(items: const [
       BottomNavigationBarItem(
         label: "Conta",
@@ -14,6 +14,39 @@ class BarraInferior extends StatelessWidget {
       BottomNavigationBarItem(
           label: "Configurações", icon: Icon(Icons.settings)),
     ]);
+  }
+}
+
+class Corpo_do_app extends StatelessWidget {
+  Corpo_do_app();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        backgroundColor: Colors.white60,
+        appBar: AppBar(
+          title: Text(
+            "Cervejas",
+            style: TextStyle(fontStyle: FontStyle.italic, color: Colors.white),
+          ),
+        ),
+        body: Center(
+          child: Column(
+            children: [
+              Container(
+                width: 280,
+                height: 280,
+                child: Image.network(
+                    'https://cervejariaantuerpia.com.br/wp-content/uploads/2022/05/4.jpg'),
+              ),
+              Center(
+                  child: Column(
+                children: [Tabela()],
+              )),
+            ],
+          ),
+        ),
+        bottomNavigationBar: BarraInferior());
   }
 }
 
@@ -101,28 +134,7 @@ void main() {
         brightness: Brightness.dark,
         primaryColor: Colors.green,
         fontFamily: 'TimesNewRoman'),
-    home: Scaffold(
-        backgroundColor: Colors.white60,
-        appBar: AppBar(
-          title: Text(
-            "Cervejas",
-            style: TextStyle(fontStyle: FontStyle.italic, color: Colors.white),
-          ),
-        ),
-        body: Center(
-          child: Column(
-            children: [
-              Container(
-                width: 280,
-                height: 280,
-                child: Image.network(
-                    'https://cervejariaantuerpia.com.br/wp-content/uploads/2022/05/4.jpg'),
-              ),
-              Center(child: Column(children: [Tabela()],)),
-            ],
-          ),
-        ),
-        bottomNavigationBar: BarraInferior()),
+    home: Corpo_do_app(),
   );
   runApp(app);
 }
