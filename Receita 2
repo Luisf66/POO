@@ -139,14 +139,26 @@ class BarraInferior extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BottomNavigationBar(items: const [
-      BottomNavigationBarItem(
-        label: "Conta",
-        icon: Icon(Icons.home),
-      ),
-      BottomNavigationBarItem(label: "Pedidos", icon: Icon(Icons.assignment)),
-      BottomNavigationBarItem(
-          label: "Configurações", icon: Icon(Icons.settings)),
-    ]);
+    return BottomNavigationBar(
+        type: BottomNavigationBarType.shifting,
+        items: const [
+          BottomNavigationBarItem(
+            label: "Conta",
+            icon: Icon(Icons.home),
+            backgroundColor: Colors.black87,
+          ),
+          BottomNavigationBarItem(
+            label: "Pedidos",
+            icon: Icon(Icons.assignment),
+          ),
+          BottomNavigationBarItem(
+            label: "Configurações",
+            icon: Icon(Icons.settings),
+          ),
+          BottomNavigationBarItem(
+            label: "Avaliar",
+            icon: Icon(Icons.rate_review_sharp),
+          ),
+        ]);
   }
 }
