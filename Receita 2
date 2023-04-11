@@ -1,20 +1,27 @@
 import 'package:flutter/material.dart';
 
-class BarraInferior extends StatelessWidget {
-  BarraInferior();
+void main() {
+  App_Main app = App_Main();
+  runApp(app);
+}
+
+class App_Main extends StatelessWidget {
+  App_Main();
 
   @override
   Widget build(BuildContext context) {
-    return BottomNavigationBar(items: const [
-      BottomNavigationBarItem(
-        label: "Conta",
-        icon: Icon(Icons.home),
-      ),
-      BottomNavigationBarItem(label: "Pedidos", icon: Icon(Icons.assignment)),
-      BottomNavigationBarItem(
-          label: "Configurações", icon: Icon(Icons.settings)),
-    ]);
+    return MaterialApp(
+      theme: ThemeData(
+          brightness: Brightness.dark,
+          primaryColor: Colors.green,
+          fontFamily: 'TimesNewRoman'),
+      home: Corpo_do_app(),
+    );
   }
+}
+
+class Barra_do_app extends AppBar {
+  Barra_do_app({super.title});
 }
 
 class Corpo_do_app extends StatelessWidget {
@@ -24,7 +31,11 @@ class Corpo_do_app extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
         backgroundColor: Colors.white60,
-        appBar: Barra_do_app(title: Text("Cervejas")),
+        appBar: Barra_do_app(
+            title: Text(
+          "Cervejas",
+          style: TextStyle(fontStyle: FontStyle.italic),
+        )),
         body: Center(
           child: Column(
             children: [
@@ -43,10 +54,6 @@ class Corpo_do_app extends StatelessWidget {
         ),
         bottomNavigationBar: BarraInferior());
   }
-}
-
-class Barra_do_app extends AppBar {
-  Barra_do_app({super.title});
 }
 
 class Tabela extends StatelessWidget {
@@ -127,13 +134,19 @@ class Tabela extends StatelessWidget {
   }
 }
 
-void main() {
-  MaterialApp app = MaterialApp(
-    theme: ThemeData(
-        brightness: Brightness.dark,
-        primaryColor: Colors.green,
-        fontFamily: 'TimesNewRoman'),
-    home: Corpo_do_app(),
-  );
-  runApp(app);
+class BarraInferior extends StatelessWidget {
+  BarraInferior();
+
+  @override
+  Widget build(BuildContext context) {
+    return BottomNavigationBar(items: const [
+      BottomNavigationBarItem(
+        label: "Conta",
+        icon: Icon(Icons.home),
+      ),
+      BottomNavigationBarItem(label: "Pedidos", icon: Icon(Icons.assignment)),
+      BottomNavigationBarItem(
+          label: "Configurações", icon: Icon(Icons.settings)),
+    ]);
+  }
 }
