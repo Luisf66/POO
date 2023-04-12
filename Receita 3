@@ -1,0 +1,170 @@
+import 'package:flutter/material.dart';
+
+void main() {
+  App_Main app = App_Main();
+  runApp(app);
+}
+
+class App_Main extends StatelessWidget {
+  App_Main();
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      theme: ThemeData(
+          brightness: Brightness.dark,
+          primaryColor: Colors.black87,
+          fontFamily: 'TimesNewRoman'),
+      home: Corpo_do_app(),
+    );
+  }
+}
+
+class Barra_do_app extends AppBar {
+  Barra_do_app({super.title});
+}
+
+class Corpo_do_app extends StatelessWidget {
+  Corpo_do_app();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        backgroundColor: Colors.white70,
+        appBar: Barra_do_app(
+            title: Text(
+          "Cervejas",
+          style: TextStyle(fontStyle: FontStyle.italic),
+        )),
+        body: Center(child: Conteudo_do_corpo()),
+        bottomNavigationBar: BarraInferior());
+  }
+}
+
+class Conteudo_do_corpo extends StatelessWidget {
+  List<String> objects;
+  Conteudo_do_corpo({this.objects = const []});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(children: [
+      Container(
+        width: 280,
+        height: 280,
+        child: Image.network(
+            'https://cervejariaantuerpia.com.br/wp-content/uploads/2022/05/4.jpg'),
+      ),
+      Center(
+          child: Column(
+        children: [Tabela()],
+      )),
+    ]);
+  }
+}
+
+class Tabela extends StatelessWidget {
+  const Tabela({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return DataTable(
+      columns: const <DataColumn>[
+        DataColumn(
+          label: Expanded(
+            child: Text(
+              'Nome',
+              style: TextStyle(fontStyle: FontStyle.italic),
+            ),
+          ),
+        ),
+        DataColumn(
+          label: Expanded(
+            child: Text(
+              'Estilo',
+              style: TextStyle(fontStyle: FontStyle.italic),
+            ),
+          ),
+        ),
+        DataColumn(
+          label: Expanded(
+            child: Text(
+              'IBU',
+              style: TextStyle(fontStyle: FontStyle.italic),
+            ),
+          ),
+        ),
+        DataColumn(
+          label: Expanded(
+            child: Text(
+              'Avaliação',
+              style: TextStyle(fontStyle: FontStyle.italic),
+            ),
+          ),
+        ),
+      ],
+      rows: const <DataRow>[
+        DataRow(
+          cells: <DataCell>[
+            DataCell(Text(' La Fin Du Monde')),
+            DataCell(Text('Bock')),
+            DataCell(Text('65')),
+            DataCell(Text('5')),
+          ],
+        ),
+        DataRow(
+          cells: <DataCell>[
+            DataCell(Text('Sapporo Premium')),
+            DataCell(Text('Sour Ale')),
+            DataCell(Text('54')),
+            DataCell(Text('4')),
+          ],
+        ),
+        DataRow(
+          cells: <DataCell>[
+            DataCell(Text('Duvel')),
+            DataCell(Text('Pilsner')),
+            DataCell(Text('82')),
+            DataCell(Text('5')),
+          ],
+        ),
+        DataRow(
+          cells: <DataCell>[
+            DataCell(Text('Cerveja Artesanal')),
+            DataCell(Text('Premium')),
+            DataCell(Text('48')),
+            DataCell(Text('3.5')),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class BarraInferior extends StatelessWidget {
+  BarraInferior();
+
+  @override
+  Widget build(BuildContext context) {
+    return BottomNavigationBar(
+        type: BottomNavigationBarType.shifting,
+        items: const [
+          BottomNavigationBarItem(
+            label: "Conta",
+            icon: Icon(Icons.home),
+            backgroundColor: Colors.black87,
+          ),
+          BottomNavigationBarItem(
+            label: "Pedidos",
+            icon: Icon(Icons.assignment),
+          ),
+          BottomNavigationBarItem(
+            label: "Configurações",
+            icon: Icon(Icons.settings),
+          ),
+          BottomNavigationBarItem(
+            label: "Avaliar",
+            icon: Icon(Icons.rate_review_sharp),
+          ),
+        ]);
+  }
+}
