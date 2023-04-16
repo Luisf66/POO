@@ -9,12 +9,18 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData(primarySwatch: Colors.deepPurple),
+      theme: ThemeData(primarySwatch: Colors.cyan),
       debugShowCheckedModeBanner: false,
       home: Scaffold(
-        appBar: AppBar(
-          title: const Text("Dicas"),
-        ),
+        backgroundColor: Colors.white,
+        appBar: BarraSuperior(
+            title: Text("Menu Inicial",
+                style: TextStyle(
+                  fontFamily: 'TimesNewRoman',
+                  fontStyle: FontStyle.italic,
+                  color: Colors.white,
+                  fontWeight: FontWeight.normal,
+                ))),
         body: DataBodyWidget(
           objects: [
             "La Fin Du Monde - Bock - 65 ibu",
@@ -46,6 +52,16 @@ class MyApp extends StatelessWidget {
   }
 }
 
+class BarraSuperior extends AppBar {
+  BarraSuperior({super.title})
+      : super(
+          leading: Icon(
+            Icons.menu,
+            size: 30,
+          ),
+        );
+}
+
 class NewNavBar extends StatelessWidget {
   final Function(int) onTap;
   final List<BottomNavigationBarItem> items;
@@ -55,6 +71,7 @@ class NewNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BottomNavigationBar(
+      backgroundColor: Colors.white,
       onTap: onTap,
       items: items,
     );
@@ -78,10 +95,11 @@ class DataBodyWidget extends StatelessWidget {
               child: Center(child: Text(obj)),
             ))
         .toList();
-    return Column(children: objects.map(
-      (obj) => Expanded(
-        child: Center(child: Text(obj)),
-        )
-        ).toList());
+    return Column(
+        children: objects
+            .map((obj) => Expanded(
+                  child: Center(child: Text(obj)),
+                ))
+            .toList());
   }
 }
