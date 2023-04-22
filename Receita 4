@@ -15,7 +15,6 @@ var conteudo_da_lista = [
 
 void main() {
   MyApp app = MyApp();
-
   runApp(app);
 }
 
@@ -30,7 +29,7 @@ class MyApp extends StatelessWidget {
         home: Scaffold(
           backgroundColor: Colors.white,
           appBar: AppBar(
-            title: const Text("Play Filmes",
+            title: const Text("Watch Filmes",
                 style: TextStyle(fontStyle: FontStyle.italic)),
             leading: Icon(Icons.menu, size: 30),
           ),
@@ -42,11 +41,6 @@ class MyApp extends StatelessWidget {
 
 class NewNavBar extends StatelessWidget {
   NewNavBar();
-  //  : super(
-  //        leading: Icon(
-  //      Icons.menu,
-  //      size: 30,
-  //    ));
 
   void botaoFoiTocado(int index) {
     print("Tocaram no botão $index");
@@ -77,20 +71,34 @@ class DataBodyWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var nome_da_coluna = ["Nome", "Duração", "Nota"],
-        propertyNames = ["Nome", "Duração", "Nota"];
-    return DataTable(
-        columns: nome_da_coluna
-            .map((name) => DataColumn(
-                label: Expanded(
-                    child: Text(name,
-                        style: TextStyle(fontStyle: FontStyle.italic)))))
-            .toList(),
-        rows: objects
-            .map((obj) => DataRow(
-                cells: propertyNames
-                    .map((propName) => DataCell(Text(obj[propName])))
-                    .toList()))
-            .toList());
+    var propertyNames = ["Nome", "Duração", "Nota"];
+    return ListView.builder(
+      itemCount: objects.length,
+      itemBuilder: (BuildContext context, int index) {
+        return Card(
+          child: Column(
+            children: <Widget>[
+              ListTile(
+                title: Text(objects[index]["Nome"]),
+                subtitle: Text(objects[index]["Duração"]),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: <Widget>[
+                  Text(
+                    "Nota: ${objects[index]["Nota"]}",
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(
+                    width: 10,
+                    height: 10,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 }
