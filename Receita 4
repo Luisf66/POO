@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 
 var conteudo_da_lista = [
-  {"Nome": "La Fin Du Monde", "Estilo": "Bock", "IBU": "65"},
-  {"Nome": "Sapporo Premiume", "Estilo": "Sour Ale", "IBU": "54"},
-  {
-    "Nome": "Duvel",
-    "Estilo": "Pilsner",
-    "IBU": "82",
-  },
+  {"Nome": "Star Wars 3", "Duração": "2H 20min", "Nota": "7"},
+  {"Nome": "Matrix", "Duração": "2H 16min", "Nota": "8.3"},
+  {"Nome": "Kizumonogatari", "Duração": "3H 36min", "Nota": "8"},
+  {"Nome": "Filme aleatório 1", "Duração": "1H 56min", "Nota": "3.6"},
+  {"Nome": "Filme aleatório 2", "Duração": "3H 6min", "Nota": "8.4"},
+  {"Nome": "Filme aleatório 3", "Duração": "2H", "Nota": "4.7"},
+  {"Nome": "Filme aleatório 4", "Duração": "4H 20min", "Nota": "6.6"},
+  {"Nome": "Filme aleatório 5", "Duração": "1H 46min", "Nota": "7"},
+  {"Nome": "Filme aleatório 6", "Duração": "57min", "Nota": "9.4"},
+  {"Nome": "Filme aleatório 7", "Duração": "1H 6min", "Nota": "10"},
 ];
 
 void main() {
@@ -21,13 +24,15 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
         theme: ThemeData(
-          primarySwatch: Colors.green,
+          primarySwatch: Colors.red,
         ),
         debugShowCheckedModeBanner: false,
         home: Scaffold(
           backgroundColor: Colors.white,
           appBar: AppBar(
-            title: const Text("Dicas"),
+            title: const Text("Play Filmes",
+                style: TextStyle(fontStyle: FontStyle.italic)),
+            leading: Icon(Icons.menu, size: 30),
           ),
           body: DataBodyWidget(objects: conteudo_da_lista),
           bottomNavigationBar: NewNavBar(),
@@ -37,6 +42,11 @@ class MyApp extends StatelessWidget {
 
 class NewNavBar extends StatelessWidget {
   NewNavBar();
+  //  : super(
+  //        leading: Icon(
+  //      Icons.menu,
+  //      size: 30,
+  //    ));
 
   void botaoFoiTocado(int index) {
     print("Tocaram no botão $index");
@@ -46,12 +56,17 @@ class NewNavBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return BottomNavigationBar(onTap: botaoFoiTocado, items: const [
       BottomNavigationBarItem(
-        label: "Cafés",
-        icon: Icon(Icons.coffee_outlined),
+        label: "Avaliar",
+        icon: Icon(Icons.rate_review),
       ),
       BottomNavigationBarItem(
-          label: "Cervejas", icon: Icon(Icons.local_drink_outlined)),
-      BottomNavigationBarItem(label: "Nações", icon: Icon(Icons.flag_outlined))
+        label: "Categorias",
+        icon: Icon(Icons.class_outlined),
+      ),
+      BottomNavigationBarItem(
+        label: "Conta",
+        icon: Icon(Icons.home_filled),
+      )
     ]);
   }
 }
@@ -62,8 +77,8 @@ class DataBodyWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var nome_da_coluna = ["Nome", "Estilo", "IBU"],
-        propertyNames = ["Nome", "Estilo", "IBU"];
+    var nome_da_coluna = ["Nome", "Duração", "Nota"],
+        propertyNames = ["Nome", "Duração", "Nota"];
     return DataTable(
         columns: nome_da_coluna
             .map((name) => DataColumn(
