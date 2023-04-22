@@ -1,5 +1,15 @@
 import 'package:flutter/material.dart';
 
+var conteudo_da_lista = [
+  {"Nome": "La Fin Du Monde", "Estilo": "Bock", "IBU": "65"},
+  {"Nome": "Sapporo Premiume", "Estilo": "Sour Ale", "IBU": "54"},
+  {
+    "Nome": "Duvel",
+    "Estilo": "Pilsner",
+    "IBU": "82",
+  },
+];
+
 void main() {
   MyApp app = MyApp();
 
@@ -10,17 +20,16 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        theme: ThemeData(primarySwatch: Colors.deepPurple),
+        theme: ThemeData(
+          primarySwatch: Colors.green,
+        ),
         debugShowCheckedModeBanner: false,
         home: Scaffold(
+          backgroundColor: Colors.white,
           appBar: AppBar(
             title: const Text("Dicas"),
           ),
-          body: DataBodyWidget(objects: [
-            "La Fin Du Monde - Bock - 65 ibu",
-            "Sapporo Premiume - Sour Ale - 54 ibu",
-            "Duvel - Pilsner - 82 ibu"
-          ]),
+          body: DataBodyWidget(objects: conteudo_da_lista),
           bottomNavigationBar: NewNavBar(),
         ));
   }
@@ -48,23 +57,25 @@ class NewNavBar extends StatelessWidget {
 }
 
 class DataBodyWidget extends StatelessWidget {
-  List<String> objects;
-
+  List objects;
   DataBodyWidget({this.objects = const []});
-
-  Expanded processarUmElemento(String obj) {
-    return Expanded(
-      child: Center(child: Text(obj)),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-        children: objects
-            .map((obj) => Expanded(
-                  child: Center(child: Text(obj)),
-                ))
+    var nome_da_coluna = ["Nome", "Estilo", "IBU"],
+        propertyNames = ["Nome", "Estilo", "IBU"];
+    return DataTable(
+        columns: nome_da_coluna
+            .map((name) => DataColumn(
+                label: Expanded(
+                    child: Text(name,
+                        style: TextStyle(fontStyle: FontStyle.italic)))))
+            .toList(),
+        rows: objects
+            .map((obj) => DataRow(
+                cells: propertyNames
+                    .map((propName) => DataCell(Text(obj[propName])))
+                    .toList()))
             .toList());
   }
 }
