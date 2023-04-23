@@ -1,21 +1,26 @@
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+void main() {
+  MyApp app = MyApp();
+  runApp(app);
+}
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    const appTitle = 'Formulário';
-
     return MaterialApp(
-      title: appTitle,
+      theme: ThemeData(primarySwatch: Colors.cyan, brightness: Brightness.dark),
       home: Scaffold(
+        //backgroundColor: Colors.white,
         appBar: AppBar(
-          title: const Text(appTitle),
+          title: const Text("Formulário",
+              style: TextStyle(fontStyle: FontStyle.italic)),
+          leading: Icon(Icons.menu, size: 30),
         ),
         body: const MyCustomForm(),
+        bottomNavigationBar: NewNavBar(),
       ),
     );
   }
@@ -49,6 +54,9 @@ class MyCustomFormState extends State<MyCustomForm> {
           //    return null;
           //  },
           //),
+          const SizedBox(
+            height: 35,
+          ),
           TextFormField(
             decoration: InputDecoration(
               border: OutlineInputBorder(
@@ -56,6 +64,9 @@ class MyCustomFormState extends State<MyCustomForm> {
               ),
               labelText: 'Nome',
             ),
+          ),
+          const SizedBox(
+            height: 5,
           ),
           TextFormField(
             decoration: InputDecoration(
@@ -69,6 +80,9 @@ class MyCustomFormState extends State<MyCustomForm> {
               labelText: 'Idade',
             ),
           ),
+          const SizedBox(
+            height: 5,
+          ),
           TextFormField(
             decoration: InputDecoration(
               border: OutlineInputBorder(
@@ -77,15 +91,22 @@ class MyCustomFormState extends State<MyCustomForm> {
               labelText: 'CPF',
             ),
           ),
+          const SizedBox(
+            height: 5,
+          ),
+          TextFormField(
+            decoration: InputDecoration(
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(68.0),
+              ),
+              labelText: 'Senha',
+            ),
+          ),
           Row(
             children: [
-              const SizedBox(
-                width: 50,
-              ),
+              const SizedBox(width: 50),
               Botao_2(),
-              const SizedBox(
-                width: 50,
-              ),
+              const SizedBox(width: 50),
               Botao_1(),
             ],
           ),
@@ -103,6 +124,9 @@ class Botao_1 extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 28.0),
       child: ElevatedButton(
+        style: ButtonStyle(
+            backgroundColor:
+                MaterialStateProperty.all<Color>(Colors.cyanAccent)),
         onPressed: () {
           bool a = true;
           if (a = true) {
@@ -125,6 +149,9 @@ class Botao_2 extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 1.0),
       child: ElevatedButton(
+        style: ButtonStyle(
+            backgroundColor:
+                MaterialStateProperty.all<Color>(Colors.cyanAccent)),
         onPressed: () {
           bool a = true;
           if (a = true) {
@@ -136,5 +163,31 @@ class Botao_2 extends StatelessWidget {
         child: const Text('Enviar'),
       ),
     );
+  }
+}
+
+class NewNavBar extends StatelessWidget {
+  NewNavBar();
+
+  void botaoFoiTocado(int index) {
+    print("Tocaram no botão $index");
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BottomNavigationBar(onTap: botaoFoiTocado, items: const [
+      BottomNavigationBarItem(
+        label: "Preencher",
+        icon: Icon(Icons.rate_review),
+      ),
+      BottomNavigationBarItem(
+        label: "Imprimir",
+        icon: Icon(Icons.print_sharp),
+      ),
+      BottomNavigationBarItem(
+        label: "Conta",
+        icon: Icon(Icons.home_filled),
+      )
+    ]);
   }
 }
