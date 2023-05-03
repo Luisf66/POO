@@ -25,22 +25,29 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class NewNavBar extends HookWidget {
+class NewNavBar extends StatefulWidget {
   NewNavBar();
 
-  void buttonTapped(int index) {
-    print("Tocaram no botão $index");
+  @override
+  _NewNavBarState createState() => _NewNavBarState();
+}
+
+class _NewNavBarState extends State<NewNavBar> {
+  int _selectedIndex = 0;
+
+  void item_selecionado(int index) {
+    setState(() {
+      _selectedIndex = index;
+      print("Tocaram no botão $index");
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     print("no build da classe X");
-    var state = useState(1);
     return BottomNavigationBar(
-        onTap: (index) {
-          state.value = index;
-        },
-        currentIndex: state.value,
+        onTap: item_selecionado,
+        currentIndex: _selectedIndex,
         items: const [
           BottomNavigationBarItem(
             label: "Cafés",
