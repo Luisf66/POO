@@ -5,10 +5,16 @@ class DataService {
   final ValueNotifier<List> tableStateNotifier = new ValueNotifier([]);
 //var dataObjects = [];
 
-  void carregar(index) {
-    if (index == 0) carregarCafes();
-    if (index == 1) carregarCervejas();
-    if (index == 2) carregarNacoes();
+  void carregar(int index) {
+    final List<Function()> functions = [
+      carregarCafes,
+      carregarCervejas,
+      carregarNacoes,
+    ];
+
+    if (index >= 0 && index < functions.length) {
+      functions[index]();
+    }
   }
 
   void carregarCervejas() {
