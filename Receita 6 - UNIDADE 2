@@ -6,7 +6,9 @@ class DataService {
 //var dataObjects = [];
 
   void carregar(index) {
+    if (index == 0) carregarCafes();
     if (index == 1) carregarCervejas();
+    if (index == 2) carregarNacoes();
   }
 
   void carregarCervejas() {
@@ -25,6 +27,46 @@ class DataService {
         "name": "Duvel",
         "style": "Pilsner",
         "ibu": "82",
+      },
+    ];
+  }
+
+  void carregarCafes() {
+    tableStateNotifier.value = [
+      {
+        "name": "Café 1",
+        "style": "Forte",
+        "ibu": "5",
+      },
+      {
+        "name": "Café 2",
+        "style": "Médio",
+        "ibu": "3.9",
+      },
+      {
+        "name": "Café 3",
+        "style": "Fraco",
+        "ibu": "3",
+      },
+    ];
+  }
+
+  void carregarNacoes() {
+    tableStateNotifier.value = [
+      {
+        "name": "Rússia",
+        "style": "Extensão",
+        "ibu": "5",
+      },
+      {
+        "name": "China",
+        "style": "População",
+        "ibu": "5",
+      },
+      {
+        "name": "EUA",
+        "style": "Economia",
+        "ibu": "5",
       },
     ];
   }
