@@ -1,229 +1,219 @@
 import 'package:flutter/material.dart';
-
 import 'package:flutter_hooks/flutter_hooks.dart';
-
 import 'package:http/http.dart' as http;
-
 import 'dart:convert';
 
-
-class DataService{
-
+class DataService {
   final ValueNotifier<List> tableStateNotifier = new ValueNotifier([]);
-
-  void carregar(index){
-
-    var res = null;
-
-    print('carregar #1 - antes de carregarCervejas');
-
-    if (index == 1) res = carregarCervejas();
-
-    print('carregar #2 - carregarCervejas retornou $res');
-
+  int selectedIndex = 0;
+  void carregar(index) {
+    var selectedIndex = index;
+    if (index == 0) {
+      carregarCafes();
+    } else if (index == 1) {
+      carregarCervejas();
+    } else if (index == 2) {
+      carregarNacoes();
+    }
   }
 
-
-
-  Future<void> carregarCervejas() async{
-
+  Future<void> carregarCervejas() async {
     var beersUri = Uri(
-      scheme: 'https',
-      host: 'random-data-api.com',
-      path: 'api/beer/random_beer',
-      queryParameters: {'size': '5'});
+        scheme: 'https',
+        host: 'random-data-api.com',
+        path: 'api/beer/random_beer',
+        queryParameters: {'size': '5'});
 
     print('carregarCervejas #1 - antes do await');
     var jsonString = await http.read(beersUri);
     print('carregarCervejas #2 - depois do await');
     var beersJson = jsonDecode(jsonString);
-    
-    tableStateNotifier.value = beersJson;
 
+    tableStateNotifier.value = beersJson;
+  }
+
+  Future<void> carregarNacoes() async {
+    var nacoesUri = Uri(
+      scheme: 'https',
+      host: 'random-data-api.com',
+      path: 'api/nation/random_nation',
+      queryParameters: {'size': '5'},
+    );
+
+    print('carregarNacoes #1 - antes do await');
+    var jsonString = await http.read(nacoesUri);
+    print('carregarNacoes #2 - depois do await');
+    var nacoesJson = jsonDecode(jsonString);
+
+    tableStateNotifier.value = nacoesJson;
+  }
+
+  Future<void> carregarCafes() async {
+    var cafesUri = Uri(
+      scheme: 'https',
+      host: 'random-data-api.com',
+      path: 'api/coffee/random_coffee',
+      queryParameters: {'size': '5'},
+    );
+
+    print('carregarCafes #1 - antes do await');
+    var jsonString = await http.read(cafesUri);
+    print('carregarCafes #2 - depois do await');
+    var cafesJson = jsonDecode(jsonString);
+
+    tableStateNotifier.value = cafesJson;
   }
 }
 
 final dataService = DataService();
 
 void main() {
-
   MyApp app = MyApp();
 
   runApp(app);
-
 }
 
 class MyApp extends StatelessWidget {
   @override
-
   Widget build(BuildContext context) {
-
     return MaterialApp(
-
       theme: ThemeData(primarySwatch: Colors.deepPurple),
-
-      debugShowCheckedModeBanner:false,
-
+      debugShowCheckedModeBanner: false,
       home: Scaffold(
-
-        appBar: AppBar( 
-
+        appBar: AppBar(
           title: const Text("Dicas"),
-
-          ),
-
-        body: ValueListenableBuilder(
-
-          valueListenable: dataService.tableStateNotifier,
-
-          builder:(_, value, __){
-
-            return DataTableWidget(
-
-              jsonObjects:value, 
-
-              propertyNames: ["name","style","ibu"], 
-
-              columnNames: ["Nome", "Estilo", "IBU"]
-
-            );
-
-          }
-
         ),
-
-        bottomNavigationBar: NewNavBar(itemSelectedCallback: dataService.carregar),
-
-      ));
-
+        body: ValueListenableBuilder<List>(
+          valueListenable: dataService.tableStateNotifier,
+          builder: (_, value, __) {
+            return DataTableWidget(
+              jsonObjects: value,
+              columnNames: getColumnNames(dataService.selectedIndex),
+              propertyNames: getPropertyNames(dataService.selectedIndex),
+            );
+          },
+        ),
+        bottomNavigationBar: NewNavBar(
+          itemSelectedCallback: dataService.carregar,
+        ),
+      ),
+    );
   }
 
+  List<String> getColumnNames(int selectedIndex) {
+    if (selectedIndex == 0) {
+      return ["Nome", "Estilo", "IBU"];
+    } else if (selectedIndex == 1) {
+      return ["Nome", "Tipo", "ABV"];
+    } else if (selectedIndex == 2) {
+      return ["Nome", "Capital", "População"];
+    }
+    return [];
+  }
 
-
+  List<String> getPropertyNames(int selectedIndex) {
+    if (selectedIndex == 0) {
+      return ["name", "style", "ibu"];
+    } else if (selectedIndex == 1) {
+      return ["name", "type", "abv"];
+    } else if (selectedIndex == 2) {
+      return ["name", "capital", "population"];
+    }
+    return [];
+  }
 }
 
+List<String> getColumnNames(int selectedIndex) {
+  if (selectedIndex == 0) {
+    return ["Nome", "Estilo", "IBU"];
+  } else if (selectedIndex == 1) {
+    return ["Nome", "Tipo", "ABV"];
+  } else if (selectedIndex == 2) {
+    return ["Nome", "Capital", "População"];
+  }
+  return [];
+}
 
-
-
+List<String> getPropertyNames(int selectedIndex) {
+  if (selectedIndex == 0) {
+    return ["name", "style", "ibu"];
+  } else if (selectedIndex == 1) {
+    return ["name", "type", "abv"];
+  } else if (selectedIndex == 2) {
+    return ["name", "capital", "population"];
+  }
+  return [];
+}
 
 class NewNavBar extends HookWidget {
-
   final _itemSelectedCallback;
 
-  NewNavBar({itemSelectedCallback}):
-
-    _itemSelectedCallback = itemSelectedCallback ?? (int){}
-
-    
-
-
+  NewNavBar({itemSelectedCallback})
+      : _itemSelectedCallback = itemSelectedCallback ?? (int) {}
 
   @override
-
   Widget build(BuildContext context) {
-
     var state = useState(1);
 
-    
-
     return BottomNavigationBar(
+        onTap: (index) {
+          state.value = index;
 
-      onTap: (index){
-
-        state.value = index;
-
-        _itemSelectedCallback(index);                
-
-      }, 
-
-      currentIndex: state.value,
-
-      items: const [
-
-        BottomNavigationBarItem(
-
-          label: "Cafés",
-
-          icon: Icon(Icons.coffee_outlined),
-
-        ),
-
-
-
-        BottomNavigationBarItem(
-
-            label: "Cervejas", icon: Icon(Icons.local_drink_outlined)),
-
-
-
-        BottomNavigationBarItem(
-
-          label: "Nações", icon: Icon(Icons.flag_outlined))
-
-      ]);
-
-
-
+          _itemSelectedCallback(index);
+        },
+        currentIndex: state.value,
+        items: const [
+          BottomNavigationBarItem(
+            label: "Cafés",
+            icon: Icon(Icons.coffee_outlined),
+          ),
+          BottomNavigationBarItem(
+              label: "Cervejas", icon: Icon(Icons.local_drink_outlined)),
+          BottomNavigationBarItem(
+              label: "Nações", icon: Icon(Icons.flag_outlined))
+        ]);
   }
-
-
-
 }
 
-class DataTableWidget extends StatelessWidget {
-
-
-
+class DataTableWidget extends HookWidget {
   final List jsonObjects;
-
   final List<String> columnNames;
-
   final List<String> propertyNames;
 
-
-
-  DataTableWidget( {this.jsonObjects = const [], this.columnNames = const ["Nome","Estilo","IBU"], this.propertyNames= const ["name", "style", "ibu"]});
-
-
+  DataTableWidget({
+    this.jsonObjects = const [],
+    this.columnNames = const ["Nome", "Estilo", "IBU"],
+    this.propertyNames = const ["name", "style", "ibu"],
+  });
 
   @override
-
   Widget build(BuildContext context) {
-
     return DataTable(
-
-      columns: columnNames.map( 
-
-                (name) => DataColumn(
-
-                  label: Expanded(
-
-                    child: Text(name, style: TextStyle(fontStyle: FontStyle.italic))
-
-                  )
-
-                )
-
-              ).toList()       
-
-      ,
-
-      rows: jsonObjects.map( 
-
-        (obj) => DataRow(
-
-            cells: propertyNames.map(
-
-              (propName) => DataCell(Text(obj[propName]))
-
-            ).toList()
-
+      columns: columnNames
+          .map(
+            (name) => DataColumn(
+              label: Expanded(
+                child: Text(
+                  name,
+                  style: TextStyle(fontStyle: FontStyle.italic),
+                ),
+              ),
+            ),
           )
-
-        ).toList());
-
+          .toList(),
+      rows: jsonObjects
+          .map(
+            (obj) => DataRow(
+              cells: propertyNames
+                  .map(
+                    (propName) => DataCell(
+                      Text(obj[propName] ?? ''),
+                    ),
+                  )
+                  .toList(),
+            ),
+          )
+          .toList(),
+    );
   }
-
-
-
 }
