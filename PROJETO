@@ -1,0 +1,215 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
+class DataService {
+  final ValueNotifier<List> tableStateNotifier = new ValueNotifier([]);
+  int selectedIndex = 0;
+  void carregar(index) {
+    var selectedIndex = index;
+    if (index == 0) {
+      carregaranimes();
+    } else if (index == 1) {
+      carregarseries();
+    } else if (index == 2) {
+      carregarfilmes();
+    } else if (index == 3) {
+      carregarfilmes();
+    }
+  }
+
+  Future<void> carregarseries() async {
+    var beersUri = Uri(
+        scheme: 'https',
+        host: 'random-data-api.com',
+        path: 'api/beer/random_beer',
+        queryParameters: {'size': '5'});
+
+    print('carregarseries #1 - antes do await');
+    var jsonString = await http.read(beersUri);
+    print('carregarseries #2 - depois do await');
+    var beersJson = jsonDecode(jsonString);
+
+    tableStateNotifier.value = beersJson;
+  }
+
+  Future<void> carregarfilmes() async {
+    var nacoesUri = Uri(
+      scheme: 'https',
+      host: 'random-data-api.com',
+      path: 'api/nation/random_nation',
+      queryParameters: {'size': '5'},
+    );
+
+    print('carregarfilmes #1 - antes do await');
+    var jsonString = await http.read(nacoesUri);
+    print('carregarfilmes #2 - depois do await');
+    var nacoesJson = jsonDecode(jsonString);
+
+    tableStateNotifier.value = nacoesJson;
+  }
+
+  Future<void> carregaranimes() async {
+    var cafesUri = Uri(
+      scheme: 'https',
+      host: 'random-data-api.com',
+      path: 'api/coffee/random_coffee',
+      queryParameters: {'size': '5'},
+    );
+
+    print('carregaranimes #1 - antes do await');
+    var jsonString = await http.read(cafesUri);
+    print('carregaranimes #2 - depois do await');
+    var cafesJson = jsonDecode(jsonString);
+
+    tableStateNotifier.value = cafesJson;
+  }
+}
+
+final dataService = DataService();
+
+void main() {
+  MyApp app = MyApp();
+
+  runApp(app);
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      theme: ThemeData(primarySwatch: Colors.deepPurple),
+      debugShowCheckedModeBanner: false,
+      home: Scaffold(
+        appBar: AppBar(
+          title: const Text("Dicas"),
+        ),
+        body: ValueListenableBuilder<List>(
+          valueListenable: dataService.tableStateNotifier,
+          builder: (_, value, __) {
+            return DataTableWidget(
+              jsonObjects: value,
+              columnNames: getColumnNames(dataService.selectedIndex),
+              propertyNames: getPropertyNames(dataService.selectedIndex),
+            );
+          },
+        ),
+        bottomNavigationBar: NewNavBar(
+          itemSelectedCallback: dataService.carregar,
+        ),
+      ),
+    );
+  }
+
+  List<String> getColumnNames(int selectedIndex) {
+    if (selectedIndex == 0) {
+      return ["Nome", "Estilo", "IBU"];
+    } else if (selectedIndex == 1) {
+      return ["Nome", "Tipo", "ABV"];
+    } else if (selectedIndex == 2) {
+      return ["Nome", "Capital", "População"];
+    }
+    return [];
+  }
+
+  List<String> getPropertyNames(int selectedIndex) {
+    if (selectedIndex == 0) {
+      return ["name", "style", "ibu"];
+    } else if (selectedIndex == 1) {
+      return ["name", "type", "abv"];
+    } else if (selectedIndex == 2) {
+      return ["name", "capital", "population"];
+    }
+    return [];
+  }
+}
+
+class NewNavBar extends HookWidget {
+  final _itemSelectedCallback;
+
+  NewNavBar({itemSelectedCallback})
+      : _itemSelectedCallback = itemSelectedCallback ?? (int) {}
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: kBottomNavigationBarHeight,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          _buildNavItem(0, Icons.play_arrow_sharp, "Animes"),
+          _buildNavItem(1, Icons.tv, "Series"),
+          _buildNavItem(2, Icons.local_play_sharp, "Filmes"),
+          _buildNavItem(3, Icons.account_circle, "Conta"),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNavItem(int index, IconData icon, String label) {
+    var state = useState(1);
+    return Expanded(
+      child: GestureDetector(
+        onTap: () {
+          state.value = index;
+          _itemSelectedCallback(index);
+        },
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 24),
+            SizedBox(height: 4),
+            Text(
+              label,
+              style: TextStyle(fontSize: 12),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class DataTableWidget extends HookWidget {
+  final List jsonObjects;
+  final List<String> columnNames;
+  final List<String> propertyNames;
+
+  DataTableWidget({
+    this.jsonObjects = const [],
+    this.columnNames = const ["Nome", "Estilo", "IBU"],
+    this.propertyNames = const ["name", "style", "ibu"],
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return DataTable(
+      columns: columnNames
+          .map(
+            (name) => DataColumn(
+              label: Expanded(
+                child: Text(
+                  name,
+                  style: TextStyle(fontStyle: FontStyle.italic),
+                ),
+              ),
+            ),
+          )
+          .toList(),
+      rows: jsonObjects
+          .map(
+            (obj) => DataRow(
+              cells: propertyNames
+                  .map(
+                    (propName) => DataCell(
+                      Text(obj[propName] ?? ''),
+                    ),
+                  )
+                  .toList(),
+            ),
+          )
+          .toList(),
+    );
+  }
+}
