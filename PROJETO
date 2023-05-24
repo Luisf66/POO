@@ -4,7 +4,12 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class DataService {
-  final ValueNotifier<List> tableStateNotifier = new ValueNotifier([]);
+  final ValueNotifier<Map<String, dynamic>> tableStateNotifier =
+      new ValueNotifier({
+    "objects": [],
+    "props": ["name", "style", "ibu"],
+    "columns": ["Info1", "Info2", "Info3"]
+  });
   int selectedIndex = 0;
   void carregar(index) {
     var selectedIndex = index;
@@ -31,7 +36,11 @@ class DataService {
     print('carregarseries #2 - depois do await');
     var beersJson = jsonDecode(jsonString);
 
-    tableStateNotifier.value = beersJson;
+    tableStateNotifier.value = {
+      "objects": beersJson,
+      "props": ["name", "style", "ibu"],
+      "columns": ["Nome", "Estilo", "IBU"]
+    };
   }
 
   Future<void> carregarfilmes() async {
@@ -47,7 +56,11 @@ class DataService {
     print('carregarfilmes #2 - depois do await');
     var nacoesJson = jsonDecode(jsonString);
 
-    tableStateNotifier.value = nacoesJson;
+    tableStateNotifier.value = {
+      "objects": nacoesJson,
+      "props": ["nationality", "language", "capital"],
+      "columns": ["Nacionalidade", "Lingua", "Capital"]
+    };
   }
 
   Future<void> carregaranimes() async {
@@ -63,7 +76,11 @@ class DataService {
     print('carregaranimes #2 - depois do await');
     var cafesJson = jsonDecode(jsonString);
 
-    tableStateNotifier.value = cafesJson;
+    tableStateNotifier.value = {
+      "objects": cafesJson,
+      "props": ["blend_name", "origin", "variety"],
+      "columns": ["Nome", "Origem", "Variedade"]
+    };
   }
 }
 
@@ -114,13 +131,14 @@ class MyApp extends StatelessWidget {
             ]),
           ),
         ),
-        body: ValueListenableBuilder<List>(
+        body: ValueListenableBuilder(
           valueListenable: dataService.tableStateNotifier,
           builder: (_, value, __) {
+            print(value);
             return DataTableWidget(
-              jsonObjects: value,
-              columnNames: getColumnNames(dataService.selectedIndex),
-              propertyNames: getPropertyNames(dataService.selectedIndex),
+              jsonObjects: value["objects"],
+              columnNames: value["columns"] as List<dynamic>,
+              propertyNames: value["props"] as List<dynamic>,
             );
           },
         ),
@@ -129,28 +147,6 @@ class MyApp extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  List<String> getColumnNames(int selectedIndex) {
-    if (selectedIndex == 0) {
-      return ["Nome", "Estilo", "IBU"];
-    } else if (selectedIndex == 1) {
-      return ["Nome", "Tipo", "ABV"];
-    } else if (selectedIndex == 2) {
-      return ["Nome", "Capital", "População"];
-    }
-    return [];
-  }
-
-  List<String> getPropertyNames(int selectedIndex) {
-    if (selectedIndex == 0) {
-      return ["name", "style", "ibu"];
-    } else if (selectedIndex == 1) {
-      return ["name", "type", "abv"];
-    } else if (selectedIndex == 2) {
-      return ["name", "capital", "population"];
-    }
-    return [];
   }
 }
 
@@ -209,13 +205,13 @@ class NewNavBar extends HookWidget {
 
 class DataTableWidget extends HookWidget {
   final List jsonObjects;
-  final List<String> columnNames;
-  final List<String> propertyNames;
+  final List columnNames;
+  final List propertyNames;
 
   DataTableWidget({
     this.jsonObjects = const [],
-    this.columnNames = const ["Nome", "Estilo", "IBU"],
-    this.propertyNames = const ["name", "style", "ibu"],
+    this.columnNames = const [],
+    this.propertyNames = const [],
   });
 
   @override
