@@ -86,21 +86,32 @@ class MyApp extends StatelessWidget {
       ),
       debugShowCheckedModeBanner: false,
       home: Scaffold(
-        appBar: AppBar(
-          title: const Text(
-            "App",
-            style: TextStyle(
-              fontStyle: FontStyle.italic,
-              color: Colors.white,
-            ),
-          ),
-          titleSpacing: 1,
-          leading: Icon(
-            Icons.menu,
-            size: 25,
-          ),
-          iconTheme: IconThemeData(
-            color: Colors.white,
+        backgroundColor: Colors.white,
+        appBar: PreferredSize(
+          preferredSize: Size.fromHeight(kToolbarHeight),
+          child: Container(
+            color: Colors.transparent,
+            child: Row(children: [
+              IconButton(
+                icon: Icon(
+                  Icons.menu,
+                  color: Colors.cyan,
+                  size: 25,
+                ),
+                onPressed: () {
+                  print("Botão menu pressionado");
+                },
+              ),
+              SizedBox(width: 5),
+              Text(
+                "App",
+                style: TextStyle(
+                  fontStyle: FontStyle.italic,
+                  color: Colors.cyan,
+                  fontSize: 20,
+                ),
+              )
+            ]),
           ),
         ),
         body: ValueListenableBuilder<List>(
