@@ -5,8 +5,12 @@ import 'dart:convert';
 
 class DataService {
   //final ValueNotifier<List> tableStateNotifier = new ValueNotifier([]);
-  final ValueNotifier<Map<String,dynamic>> tableStateNotifier =
-      new ValueNotifier({"objects": [], "props": [], "columns": []});
+  final ValueNotifier<Map<String, dynamic>> tableStateNotifier =
+      new ValueNotifier({
+    "objects": [],
+    "props": ["name", "style", "ibu"],
+    "columns": ["daghj", "sdhjsh", "adhj"]
+  });
 
   int selectedIndex = 0;
   void carregar(index) {
@@ -35,7 +39,7 @@ class DataService {
     tableStateNotifier.value = {
       "objects": beersJson,
       "props": ["name", "style", "ibu"],
-      "columns": ["daghj", "sdhjsh", "adhj"]
+      "columns": ["Nome", "Estilo", "IBU"]
     };
   }
 
@@ -53,6 +57,11 @@ class DataService {
     var nacoesJson = jsonDecode(jsonString);
 
     //tableStateNotifier.value = nacoesJson;
+    tableStateNotifier.value = {
+      "objects": nacoesJson,
+      "props": ["nationality", "language", "capital"],
+      "columns": ["Nacionalidade", "Lingua", "Capital"]
+    };
   }
 
   Future<void> carregarCafes() async {
@@ -69,6 +78,11 @@ class DataService {
     var cafesJson = jsonDecode(jsonString);
 
     //tableStateNotifier.value = cafesJson;
+    tableStateNotifier.value = {
+      "objects": cafesJson,
+      "props": ["blend_name", "origin", "variety"],
+      "columns": ["Nome", "Origem", "Variedade"]
+    };
   }
 }
 
@@ -96,8 +110,8 @@ class MyApp extends StatelessWidget {
             print(value);
             return DataTableWidget(
               jsonObjects: value["objects"],
-              columnNames: value["columns"] as List<String>,
-              propertyNames: value["props"] as List<String>,
+              columnNames: value["columns"] as List<dynamic>,
+              propertyNames: value["props"] as List<dynamic>,
             );
           },
         ),
@@ -107,50 +121,6 @@ class MyApp extends StatelessWidget {
       ),
     );
   }
-
-  List<String> getColumnNames(int selectedIndex) {
-    if (selectedIndex == 0) {
-      return ["Nome", "Estilo", "IBU"];
-    } else if (selectedIndex == 1) {
-      return ["Nome", "Tipo", "ABV"];
-    } else if (selectedIndex == 2) {
-      return ["Nome", "Capital", "População"];
-    }
-    return [];
-  }
-
-  List<String> getPropertyNames(int selectedIndex) {
-    if (selectedIndex == 0) {
-      return ["name", "style", "ibu"];
-    } else if (selectedIndex == 1) {
-      return ["name", "type", "abv"];
-    } else if (selectedIndex == 2) {
-      return ["name", "capital", "population"];
-    }
-    return [];
-  }
-}
-
-List<String> getColumnNames(int selectedIndex) {
-  if (selectedIndex == 0) {
-    return ["Nome", "Estilo", "IBU"];
-  } else if (selectedIndex == 1) {
-    return ["Nome", "Tipo", "ABV"];
-  } else if (selectedIndex == 2) {
-    return ["Nome", "Capital", "População"];
-  }
-  return [];
-}
-
-List<String> getPropertyNames(int selectedIndex) {
-  if (selectedIndex == 0) {
-    return ["name", "style", "ibu"];
-  } else if (selectedIndex == 1) {
-    return ["name", "type", "abv"];
-  } else if (selectedIndex == 2) {
-    return ["name", "capital", "population"];
-  }
-  return [];
 }
 
 class NewNavBar extends HookWidget {
@@ -185,8 +155,8 @@ class NewNavBar extends HookWidget {
 
 class DataTableWidget extends HookWidget {
   final List jsonObjects;
-  final List<String> columnNames;
-  final List<String> propertyNames;
+  final List columnNames;
+  final List propertyNames;
 
   DataTableWidget({
     this.jsonObjects = const [],
@@ -215,7 +185,7 @@ class DataTableWidget extends HookWidget {
               cells: propertyNames
                   .map(
                     (propName) => DataCell(
-                      Text(obj[propName] ?? ''),
+                      Text(obj[propName]),
                     ),
                   )
                   .toList(),
