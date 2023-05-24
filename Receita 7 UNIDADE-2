@@ -4,7 +4,6 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class DataService {
-  //final ValueNotifier<List> tableStateNotifier = new ValueNotifier([]);
   final ValueNotifier<Map<String, dynamic>> tableStateNotifier =
       new ValueNotifier({
     "objects": [],
@@ -56,7 +55,6 @@ class DataService {
     print('carregarNacoes #2 - depois do await');
     var nacoesJson = jsonDecode(jsonString);
 
-    //tableStateNotifier.value = nacoesJson;
     tableStateNotifier.value = {
       "objects": nacoesJson,
       "props": ["nationality", "language", "capital"],
@@ -77,7 +75,6 @@ class DataService {
     print('carregarCafes #2 - depois do await');
     var cafesJson = jsonDecode(jsonString);
 
-    //tableStateNotifier.value = cafesJson;
     tableStateNotifier.value = {
       "objects": cafesJson,
       "props": ["blend_name", "origin", "variety"],
@@ -160,8 +157,8 @@ class DataTableWidget extends HookWidget {
 
   DataTableWidget({
     this.jsonObjects = const [],
-    this.columnNames = const ["Nome", "Estilo", "IBU"],
-    this.propertyNames = const ["name", "style", "ibu"],
+    this.columnNames = const [],
+    this.propertyNames = const [],
   });
 
   @override
