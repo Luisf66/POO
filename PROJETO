@@ -29,8 +29,8 @@ class DataService {
   Future<void> carregarseries() async {
     var beersUri = Uri(
         scheme: 'https',
-        host: 'random-data-api.com',
-        path: 'api/beer/random_beer',
+        host: 'api.themoviedb.org',
+        path: '3/movie/550',
         queryParameters: {'size': '10'});
 
     print('carregarseries #1 - antes do await');
@@ -40,8 +40,8 @@ class DataService {
 
     tableStateNotifier.value = {
       "objects": beersJson,
-      "props": ["name", "style", "ibu"],
-      "columns": ["Nome", "Estilo", "IBU"]
+      "props": ["original_title", "genres", "original_language"],
+      "columns": ["Nome", "Gênero", "Idioma"]
     };
   }
 
