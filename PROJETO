@@ -1,6 +1,4 @@
-//https://api.themoviedb.org/3/movie/550?api_key=3a39ee12e899993bc864c55c9fe1242d
-
-//eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIzYTM5ZWUxMmU4OTk5OTNiYzg2NGM1NWM5ZmUxMjQyZCIsInN1YiI6IjY0NmViNzFhNzFmZmRmMDBhNzNiMmI2NCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.gIdXSXes_EYRQpJsysncqoOiH3-h-1SxHf5BVYVJf_U
+//https://api.themoviedb.org/3/discover/movie?api_key=5cfcb26280fab4a3855afa602bcee3e0
 
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -11,52 +9,52 @@ class DataService {
   final ValueNotifier<Map<String, dynamic>> tableStateNotifier =
       new ValueNotifier({
     "objects": [],
-    "props": ["name", "id", "origin_country"],
+    "props": ["name", "style", "ibu"],
+    "columns": ["Pressione", "Qualquer", "Icone"]
   });
+
   int selectedIndex = 0;
   void carregar(index) {
     var selectedIndex = index;
     if (index == 0) {
-      carregaranimes();
+      carregarCafes();
     } else if (index == 1) {
-      carregarseries();
+      carregarCervejas();
     } else if (index == 2) {
-      carregarfilmes();
-    } else if (index == 3) {
-      carregarfilmes();
+      carregarNacoes();
     }
   }
 
-  Future<void> carregarseries() async {
+  Future<void> carregarCervejas() async {
     var beersUri = Uri(
         scheme: 'https',
         host: 'api.themoviedb.org',
-        path: '3/movie/550',
-        queryParameters: {'size': '10','api_key' : '3a39ee12e899993bc864c55c9fe1242d'});
+        path: '/3/discover/movie',
+        queryParameters: {'api_key': '5cfcb26280fab4a3855afa602bcee3e0'});
 
-    print('carregarseries #1 - antes do await');
+    print('carregarCervejas #1 - antes do await');
     var jsonString = await http.read(beersUri);
-    print('carregarseries #2 - depois do await');
+    print('carregarCervejas #2 - depois do await');
     var beersJson = jsonDecode(jsonString);
 
     tableStateNotifier.value = {
       "objects": beersJson,
-      "props": ["name", "id", "origin_country"],
-      "columns": ["Nome", "Gênero", "País"]
+      "props": ["original_title", "genre_ids", "release_date"],
+      "columns": ["Nome", "Gênero", "Lançamento"]
     };
   }
 
-  Future<void> carregarfilmes() async {
+  Future<void> carregarNacoes() async {
     var nacoesUri = Uri(
       scheme: 'https',
       host: 'random-data-api.com',
       path: 'api/nation/random_nation',
-      queryParameters: {'size': '10'},
+      queryParameters: {'size': '5'},
     );
 
-    print('carregarfilmes #1 - antes do await');
+    print('carregarNacoes #1 - antes do await');
     var jsonString = await http.read(nacoesUri);
-    print('carregarfilmes #2 - depois do await');
+    print('carregarNacoes #2 - depois do await');
     var nacoesJson = jsonDecode(jsonString);
 
     tableStateNotifier.value = {
@@ -66,17 +64,17 @@ class DataService {
     };
   }
 
-  Future<void> carregaranimes() async {
+  Future<void> carregarCafes() async {
     var cafesUri = Uri(
       scheme: 'https',
       host: 'random-data-api.com',
       path: 'api/coffee/random_coffee',
-      queryParameters: {'size': '10'},
+      queryParameters: {'size': '5'},
     );
 
-    print('carregaranimes #1 - antes do await');
+    print('carregarCafes #1 - antes do await');
     var jsonString = await http.read(cafesUri);
-    print('carregaranimes #2 - depois do await');
+    print('carregarCafes #2 - depois do await');
     var cafesJson = jsonDecode(jsonString);
 
     tableStateNotifier.value = {
@@ -99,47 +97,21 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData(
-        primarySwatch: Colors.cyan,
-        //brightness: Brightness.dark,
-        fontFamily: 'TimesNewRoman',
-      ),
+      theme: ThemeData(primarySwatch: Colors.deepPurple),
       debugShowCheckedModeBanner: false,
       home: Scaffold(
-        backgroundColor: Colors.white,
-        appBar: PreferredSize(
-          preferredSize: Size.fromHeight(kToolbarHeight),
-          child: Container(
-            color: Colors.transparent,
-            child: Row(children: [
-              IconButton(
-                icon: Icon(
-                  Icons.menu,
-                  color: Colors.cyan,
-                  size: 25,
-                ),
-                onPressed: () {
-                  print("Botão menu pressionado");
-                },
-              ),
-              SizedBox(width: 5),
-              Text(
-                "App",
-                style: TextStyle(
-                  fontStyle: FontStyle.italic,
-                  color: Colors.cyan,
-                  fontSize: 20,
-                ),
-              )
-            ]),
-          ),
+        appBar: AppBar(
+          title: const Text("Dicas"),
         ),
         body: ValueListenableBuilder(
           valueListenable: dataService.tableStateNotifier,
           builder: (_, value, __) {
+            //final jsonObjects = (value["objects"] as Map<String, dynamic>).values.toList();
+
             print(value);
-            return ListviewWidget(
-              jsonObjects: value["objects"] as List<dynamic>,
+            return DataTableWidget(
+              jsonObjects: value["objects"],
+              columnNames: value["columns"] as List<dynamic>,
               propertyNames: value["props"] as List<dynamic>,
             );
           },
@@ -160,69 +132,67 @@ class NewNavBar extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: kBottomNavigationBarHeight,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          _buildNavItem(0, Icons.play_arrow_sharp, "Animes"),
-          _buildNavItem(1, Icons.tv, "Series"),
-          _buildNavItem(2, Icons.local_play_sharp, "Filmes"),
-          _buildNavItem(3, Icons.account_circle, "Conta"),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildNavItem(int index, IconData icon, String label) {
     var state = useState(1);
-    return Expanded(
-      child: GestureDetector(
-        onTap: () {
+
+    return BottomNavigationBar(
+        onTap: (index) {
           state.value = index;
+
           _itemSelectedCallback(index);
         },
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              size: 24,
-              color: Colors.cyan,
-            ),
-            SizedBox(height: 4),
-            Text(
-              label,
-              style: const TextStyle(
-                fontSize: 12,
-                fontStyle: FontStyle.italic,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+        currentIndex: state.value,
+        items: const [
+          BottomNavigationBarItem(
+            label: "Cafés",
+            icon: Icon(Icons.coffee_outlined),
+          ),
+          BottomNavigationBarItem(
+              label: "Cervejas", icon: Icon(Icons.local_drink_outlined)),
+          BottomNavigationBarItem(
+              label: "Nações", icon: Icon(Icons.flag_outlined))
+        ]);
   }
 }
 
-class ListviewWidget extends HookWidget {
+class DataTableWidget extends HookWidget {
   final List jsonObjects;
+  final List columnNames;
   final List propertyNames;
 
-  ListviewWidget({
+  DataTableWidget({
     this.jsonObjects = const [],
+    this.columnNames = const [],
     this.propertyNames = const [],
   });
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-        itemCount: jsonObjects.length,
-        itemBuilder: (context, index) {
-          final obj = jsonObjects[index];
-          return ListTile(
-              title: Text(obj[propertyNames[0]] ?? ''),
-              subtitle: Text(obj[propertyNames[1]] ?? ''));
-        });
+    return DataTable(
+      columns: columnNames
+          .map(
+            (name) => DataColumn(
+              label: Expanded(
+                child: Text(
+                  name,
+                  style: TextStyle(fontStyle: FontStyle.italic),
+                ),
+              ),
+            ),
+          )
+          .toList(),
+      rows: jsonObjects
+          .map(
+            (obj) => DataRow(
+              cells: propertyNames
+                  .map(
+                    (propName) => DataCell(
+                      Text(obj[propName]),
+                    ),
+                  )
+                  .toList(),
+            ),
+          )
+          .toList(),
+    );
   }
 }
