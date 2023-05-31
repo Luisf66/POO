@@ -13,6 +13,8 @@ class DataService {
     "columns": ["Pressione", "Qualquer", "Icone"]
   });
 
+  List<dynamic> objectsData = [];
+
   int selectedIndex = 0;
   void carregar(index) {
     var selectedIndex = index;
@@ -37,8 +39,10 @@ class DataService {
     print('carregarCervejas #2 - depois do await');
     var beersJson = jsonDecode(jsonString);
 
+    objectsData = beersJson['results'];
+
     tableStateNotifier.value = {
-      "objects": beersJson,
+      "objects": objectsData,
       "props": ["original_title", "genre_ids", "release_date"],
       "columns": ["Nome", "Gênero", "Lançamento"]
     };
@@ -186,7 +190,11 @@ class DataTableWidget extends HookWidget {
               cells: propertyNames
                   .map(
                     (propName) => DataCell(
-                      Text(obj[propName]),
+                      Text(
+                        obj[propName] is List
+                            ? obj[propName].join(", ")
+                            : obj[propName].toString(),
+                      ),
                     ),
                   )
                   .toList(),
