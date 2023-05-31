@@ -68,7 +68,12 @@ class MyApp extends StatelessWidget {
               builder: (_, value, __) {
                 switch (value['status']) {
                   case TableStatus.idle:
-                    return Text("Toque algum botão");
+                    return Center(
+                      child: ElevatedButton(child: Text('Pressione o icone abaixo',style: TextStyle(fontStyle: FontStyle.italic,fontSize: 15),),
+                      onPressed: () {
+                        print("Botão pressionado");
+                      },)
+                    );
 
                   case TableStatus.loading:
                     return CircularProgressIndicator();
