@@ -26,20 +26,20 @@ class DataService {
     return;
   }
 
-  void carregarCervejas() async {
+  void carregarCervejas(int quantity) async {
     var beersUri = Uri(
         scheme: 'https',
         host: 'random-data-api.com',
         path: 'api/beer/random_beer',
-        queryParameters: {'size': '10'});
+        queryParameters: {'size': '$quantity'});
 
     http.read(beersUri).then((jsonString) {
       var beersJson = jsonDecode(jsonString);
       tableStateNotifier.value = {
         'status': TableStatus.ready,
         'dataObjects': beersJson,
-        'propertyNames': ["name", "style", "ibu","alcohol"],
-        'columns' : ["Nome", "Estilo", "IBU","alcohol"]
+        'propertyNames': ["name", "style", "ibu", "alcohol"],
+        'columns': ["Nome", "Estilo", "IBU", "Álcool"]
       };
     });
   }
@@ -54,6 +54,9 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
+  List<bool> _selections = List.generate(3, (_) => false);
+  List<int> _beerQuantities = [5, 10, 15];
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -62,6 +65,31 @@ class MyApp extends StatelessWidget {
         home: Scaffold(
           appBar: AppBar(
             title: const Text("Dicas"),
+            actions: [
+              ToggleButtons(
+                children: [
+                  Icon(Icons.five_mp),
+                  Icon(Icons.ten_mp),
+                  Icon(Icons.fifteen_mp),
+                ],
+                selectedColor: Colors.white,
+                color: Colors.white,
+                isSelected: _selections,
+                onPressed: (int index) {
+                  for (int buttonIndex = 0;
+                      buttonIndex < _selections.length;
+                      buttonIndex++) {
+                    if (buttonIndex == index) {
+                      _selections[buttonIndex] = true;
+                      dataService.carregarCervejas(_beerQuantities[index]);
+                    } else {
+                      _selections[buttonIndex] = false;
+                    }
+                  }
+                  ;
+                },
+              )
+            ],
           ),
           body: ValueListenableBuilder(
               valueListenable: dataService.tableStateNotifier,
@@ -69,20 +97,28 @@ class MyApp extends StatelessWidget {
                 switch (value['status']) {
                   case TableStatus.idle:
                     return Center(
-                      child: ElevatedButton(child: Text('Pressione o icone abaixo',style: TextStyle(fontStyle: FontStyle.italic,fontSize: 15),),
+                        child: ElevatedButton(
+                      child: Text(
+                        'Pressione o icone abaixo',
+                        style: TextStyle(
+                            fontStyle: FontStyle.italic, fontSize: 15),
+                      ),
                       onPressed: () {
                         print("Botão pressionado");
-                      },)
-                    );
+                      },
+                    ));
 
                   case TableStatus.loading:
-                    return Center(child: CircularProgressIndicator(),);
+                    return Center(
+                      child: CircularProgressIndicator(),
+                    );
 
                   case TableStatus.ready:
                     return DataTableWidget(
-                        jsonObjects: value['dataObjects'],
-                        propertyNames: value['propertyNames'],
-                        columnNames: value['columns'],);
+                      jsonObjects: value['dataObjects'],
+                      propertyNames: value['propertyNames'],
+                      columnNames: value['columns'],
+                    );
 
                   case TableStatus.error:
                     return Text("Lascou");
@@ -155,15 +191,3 @@ class DataTableWidget extends StatelessWidget {
             .toList());
   }
 }
-
-/*
-list<bool> _selections = List.generate(3, (_) => false);
-
-                        ToggleButtons(
-                          children: [
-                            Icon(Icons.one_k),
-                            Icon(Icons.five_k),
-                            Icon(Icons.ten_k),
-                          ],
-                          isSelected: _selections,));
-*/
