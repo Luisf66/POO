@@ -32,7 +32,10 @@ class DataService {
         scheme: 'https',
         host: 'api.themoviedb.org',
         path: '/3/discover/movie',
-        queryParameters: {'api_key': '5cfcb26280fab4a3855afa602bcee3e0'});
+        queryParameters: {
+          'api_key': '5cfcb26280fab4a3855afa602bcee3e0',
+          'language': 'pt-BR'
+        });
 
     print('carregarCervejas #1 - antes do await');
     var jsonString = await http.read(beersUri);
@@ -43,8 +46,8 @@ class DataService {
 
     tableStateNotifier.value = {
       "objects": objectsData,
-      "props": ["original_title", "genre_ids", "release_date"],
-      "columns": ["Nome", "Gênero", "Lançamento"]
+      "props": ["title", "original_language", "release_date"],
+      "columns": ["Nome", "Idioma", "Lançamento"]
     };
   }
 
@@ -53,7 +56,7 @@ class DataService {
       scheme: 'https',
       host: 'random-data-api.com',
       path: 'api/nation/random_nation',
-      queryParameters: {'size': '5'},
+      queryParameters: {'size': '15'},
     );
 
     print('carregarNacoes #1 - antes do await');
@@ -73,7 +76,7 @@ class DataService {
       scheme: 'https',
       host: 'random-data-api.com',
       path: 'api/coffee/random_coffee',
-      queryParameters: {'size': '5'},
+      queryParameters: {'size': '15'},
     );
 
     print('carregarCafes #1 - antes do await');
@@ -101,11 +104,53 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData(primarySwatch: Colors.deepPurple),
+      theme: ThemeData(
+        primarySwatch: Colors.cyan,
+        fontFamily: 'TimesNewRoman',
+      ),
       debugShowCheckedModeBanner: false,
       home: Scaffold(
-        appBar: AppBar(
-          title: const Text("Dicas"),
+        backgroundColor: Colors.white,
+        appBar: PreferredSize(
+          preferredSize: Size.fromHeight(kToolbarHeight),
+          child: Container(
+            color: Colors.transparent,
+            child: Container(
+              width: 70,
+              child: TextButton(
+                onPressed: () {
+                  print("Botão menu pressionado");
+                },
+                style: ButtonStyle(
+                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                    RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20.0),
+                    ),
+                  ),
+                  backgroundColor:
+                      MaterialStateProperty.all<Color>(Colors.cyan),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.menu,
+                      color: Colors.white,
+                      size: 25,
+                    ),
+                    SizedBox(width: 5),
+                    Text(
+                      "App",
+                      style: TextStyle(
+                        fontStyle: FontStyle.italic,
+                        color: Colors.white,
+                        fontSize: 20,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
         ),
         body: ValueListenableBuilder(
           valueListenable: dataService.tableStateNotifier,
@@ -151,7 +196,7 @@ class NewNavBar extends HookWidget {
             icon: Icon(Icons.coffee_outlined),
           ),
           BottomNavigationBarItem(
-              label: "Cervejas", icon: Icon(Icons.local_drink_outlined)),
+              label: "", icon: Icon(Icons.local_play_sharp)),
           BottomNavigationBarItem(
               label: "Nações", icon: Icon(Icons.flag_outlined))
         ]);
@@ -171,36 +216,41 @@ class DataTableWidget extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DataTable(
-      columns: columnNames
-          .map(
-            (name) => DataColumn(
-              label: Expanded(
-                child: Text(
-                  name,
-                  style: TextStyle(fontStyle: FontStyle.italic),
+    return SingleChildScrollView(
+      scrollDirection: Axis.vertical,
+      child: DataTable(
+        dataRowHeight: 60,
+        //dataTextStyle: TextStyle(fontStyle: FontStyle.italic),
+        columns: columnNames
+            .map(
+              (name) => DataColumn(
+                label: Expanded(
+                  child: Text(
+                    name,
+                    style: TextStyle(fontStyle: FontStyle.italic),
+                  ),
                 ),
               ),
-            ),
-          )
-          .toList(),
-      rows: jsonObjects
-          .map(
-            (obj) => DataRow(
-              cells: propertyNames
-                  .map(
-                    (propName) => DataCell(
-                      Text(
-                        obj[propName] is List
-                            ? obj[propName].join(", ")
-                            : obj[propName].toString(),
+            )
+            .toList(),
+        rows: jsonObjects
+            .map(
+              (obj) => DataRow(
+                cells: propertyNames
+                    .map(
+                      (propName) => DataCell(
+                        Text(
+                          obj[propName] is List
+                              ? obj[propName].join(", ")
+                              : obj[propName].toString(),
+                        ),
                       ),
-                    ),
-                  )
-                  .toList(),
-            ),
-          )
-          .toList(),
+                    )
+                    .toList(),
+              ),
+            )
+            .toList(),
+      ),
     );
   }
 }
