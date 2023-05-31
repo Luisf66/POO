@@ -68,10 +68,12 @@ class MyApp extends StatelessWidget {
             actions: [
               ToggleButtons(
                 children: [
-                  Icon(Icons.one_k),
-                  Icon(Icons.five_k),
-                  Icon(Icons.ten_k),
+                  Icon(Icons.five_mp),
+                  Icon(Icons.ten_mp),
+                  Icon(Icons.fifteen_mp),
                 ],
+                selectedColor: Colors.white,
+                color: Colors.white,
                 isSelected: _selections,
                 onPressed: (int index) {
                   for (int buttonIndex = 0;
