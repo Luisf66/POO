@@ -3,83 +3,45 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+enum TableStatus { idle, loading, ready, error }
+
 class DataService {
   final ValueNotifier<Map<String, dynamic>> tableStateNotifier =
-      new ValueNotifier({
-    "objects": [],
-    "props": ["name", "style", "ibu"],
-    "columns": ["daghj", "sdhjsh", "adhj"]
-  });
+      ValueNotifier({'status': TableStatus.idle, 'dataObjects': []});
 
-  int selectedIndex = 0;
   void carregar(index) {
-    var selectedIndex = index;
-    if (index == 0) {
-      carregarCafes();
-    } else if (index == 1) {
-      carregarCervejas();
-    } else if (index == 2) {
-      carregarNacoes();
-    }
+    final funcoes = [carregarCafes, carregarCervejas, carregarNacoes];
+    tableStateNotifier.value = {
+      'status': TableStatus.loading,
+      'dataObjects': []
+    };
+    funcoes[index]();
   }
 
-  Future<void> carregarCervejas() async {
+  void carregarCafes() {
+    return;
+  }
+
+  void carregarNacoes() {
+    return;
+  }
+
+  void carregarCervejas(int quantity) async {
     var beersUri = Uri(
         scheme: 'https',
         host: 'random-data-api.com',
         path: 'api/beer/random_beer',
-        queryParameters: {'size': '5'});
+        queryParameters: {'size': '$quantity'});
 
-    print('carregarCervejas #1 - antes do await');
-    var jsonString = await http.read(beersUri);
-    print('carregarCervejas #2 - depois do await');
-    var beersJson = jsonDecode(jsonString);
-
-    tableStateNotifier.value = {
-      "objects": beersJson,
-      "props": ["name", "style", "ibu"],
-      "columns": ["Nome", "Estilo", "IBU"]
-    };
-  }
-
-  Future<void> carregarNacoes() async {
-    var nacoesUri = Uri(
-      scheme: 'https',
-      host: 'random-data-api.com',
-      path: 'api/nation/random_nation',
-      queryParameters: {'size': '5'},
-    );
-
-    print('carregarNacoes #1 - antes do await');
-    var jsonString = await http.read(nacoesUri);
-    print('carregarNacoes #2 - depois do await');
-    var nacoesJson = jsonDecode(jsonString);
-
-    tableStateNotifier.value = {
-      "objects": nacoesJson,
-      "props": ["nationality", "language", "capital"],
-      "columns": ["Nacionalidade", "Lingua", "Capital"]
-    };
-  }
-
-  Future<void> carregarCafes() async {
-    var cafesUri = Uri(
-      scheme: 'https',
-      host: 'random-data-api.com',
-      path: 'api/coffee/random_coffee',
-      queryParameters: {'size': '5'},
-    );
-
-    print('carregarCafes #1 - antes do await');
-    var jsonString = await http.read(cafesUri);
-    print('carregarCafes #2 - depois do await');
-    var cafesJson = jsonDecode(jsonString);
-
-    tableStateNotifier.value = {
-      "objects": cafesJson,
-      "props": ["blend_name", "origin", "variety"],
-      "columns": ["Nome", "Origem", "Variedade"]
-    };
+    http.read(beersUri).then((jsonString) {
+      var beersJson = jsonDecode(jsonString);
+      tableStateNotifier.value = {
+        'status': TableStatus.ready,
+        'dataObjects': beersJson,
+        'propertyNames': ["name", "style", "ibu", "alcohol"],
+        'columns': ["Nome", "Estilo", "IBU", "Álcool"]
+      };
+    });
   }
 }
 
@@ -92,31 +54,79 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
+  List<bool> _selections = List.generate(3, (_) => false);
+  List<int> _beerQuantities = [5, 10, 15];
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData(primarySwatch: Colors.deepPurple),
-      debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text("Dicas"),
-        ),
-        body: ValueListenableBuilder(
-          valueListenable: dataService.tableStateNotifier,
-          builder: (_, value, __) {
-            print(value);
-            return DataTableWidget(
-              jsonObjects: value["objects"],
-              columnNames: value["columns"] as List<dynamic>,
-              propertyNames: value["props"] as List<dynamic>,
-            );
-          },
-        ),
-        bottomNavigationBar: NewNavBar(
-          itemSelectedCallback: dataService.carregar,
-        ),
-      ),
-    );
+        theme: ThemeData(primarySwatch: Colors.deepPurple),
+        debugShowCheckedModeBanner: false,
+        home: Scaffold(
+          appBar: AppBar(
+            title: const Text("Dicas"),
+            actions: [
+              ToggleButtons(
+                children: [
+                  Icon(Icons.one_k),
+                  Icon(Icons.five_k),
+                  Icon(Icons.ten_k),
+                ],
+                isSelected: _selections,
+                onPressed: (int index) {
+                  for (int buttonIndex = 0;
+                      buttonIndex < _selections.length;
+                      buttonIndex++) {
+                    if (buttonIndex == index) {
+                      _selections[buttonIndex] = true;
+                      dataService.carregarCervejas(_beerQuantities[index]);
+                    } else {
+                      _selections[buttonIndex] = false;
+                    }
+                  }
+                  ;
+                },
+              )
+            ],
+          ),
+          body: ValueListenableBuilder(
+              valueListenable: dataService.tableStateNotifier,
+              builder: (_, value, __) {
+                switch (value['status']) {
+                  case TableStatus.idle:
+                    return Center(
+                        child: ElevatedButton(
+                      child: Text(
+                        'Pressione o icone abaixo',
+                        style: TextStyle(
+                            fontStyle: FontStyle.italic, fontSize: 15),
+                      ),
+                      onPressed: () {
+                        print("Botão pressionado");
+                      },
+                    ));
+
+                  case TableStatus.loading:
+                    return Center(
+                      child: CircularProgressIndicator(),
+                    );
+
+                  case TableStatus.ready:
+                    return DataTableWidget(
+                      jsonObjects: value['dataObjects'],
+                      propertyNames: value['propertyNames'],
+                      columnNames: value['columns'],
+                    );
+
+                  case TableStatus.error:
+                    return Text("Lascou");
+                }
+
+                return Text("...");
+              }),
+          bottomNavigationBar:
+              NewNavBar(itemSelectedCallback: dataService.carregar),
+        ));
   }
 }
 
@@ -150,45 +160,44 @@ class NewNavBar extends HookWidget {
   }
 }
 
-class DataTableWidget extends HookWidget {
+class DataTableWidget extends StatelessWidget {
   final List jsonObjects;
-  final List columnNames;
-  final List propertyNames;
 
-  DataTableWidget({
-    this.jsonObjects = const [],
-    this.columnNames = const [],
-    this.propertyNames = const [],
-  });
+  final List<String> columnNames;
+
+  final List<String> propertyNames;
+
+  DataTableWidget(
+      {this.jsonObjects = const [],
+      this.columnNames = const ["Nome", "Estilo", "IBU"],
+      this.propertyNames = const ["name", "style", "ibu"]});
 
   @override
   Widget build(BuildContext context) {
     return DataTable(
-      columns: columnNames
-          .map(
-            (name) => DataColumn(
-              label: Expanded(
-                child: Text(
-                  name,
-                  style: TextStyle(fontStyle: FontStyle.italic),
-                ),
-              ),
-            ),
-          )
-          .toList(),
-      rows: jsonObjects
-          .map(
-            (obj) => DataRow(
-              cells: propertyNames
-                  .map(
-                    (propName) => DataCell(
-                      Text(obj[propName]),
-                    ),
-                  )
-                  .toList(),
-            ),
-          )
-          .toList(),
-    );
+        columns: columnNames
+            .map((name) => DataColumn(
+                label: Expanded(
+                    child: Text(name,
+                        style: TextStyle(fontStyle: FontStyle.italic)))))
+            .toList(),
+        rows: jsonObjects
+            .map((obj) => DataRow(
+                cells: propertyNames
+                    .map((propName) => DataCell(Text(obj[propName])))
+                    .toList()))
+            .toList());
   }
 }
+
+/*
+list<bool> _selections = List.generate(3, (_) => false);
+
+                        ToggleButtons(
+                          children: [
+                            Icon(Icons.one_k),
+                            Icon(Icons.five_k),
+                            Icon(Icons.ten_k),
+                          ],
+                          isSelected: _selections,));
+*/
