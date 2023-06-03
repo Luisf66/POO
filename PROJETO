@@ -1,4 +1,5 @@
 //https://api.themoviedb.org/3/discover/movie?api_key=5cfcb26280fab4a3855afa602bcee3e0
+//https://mugenmonkey.com/api/v0/ds3_builds
 
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -6,11 +7,10 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class DataService {
-  final ValueNotifier<Map<String, dynamic>> tableStateNotifier =
-      new ValueNotifier({
+  final ValueNotifier<Map<String, dynamic>> tableStateNotifier = ValueNotifier({
     "objects": [],
     "props": ["name", "style", "ibu"],
-    "columns": ["Pressione", "Qualquer", "Icone"]
+    "columns": ["", "", ""]
   });
 
   List<dynamic> objectsData = [];
@@ -117,37 +117,42 @@ class MyApp extends StatelessWidget {
             color: Colors.transparent,
             child: Container(
               width: 70,
-              child: TextButton(
-                onPressed: () {
-                  print("Botão menu pressionado");
-                },
-                style: ButtonStyle(
-                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                    RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20.0),
+              child: Row(
+                children: [
+                  PopupMenuButton<String>(
+                    onSelected: (value) {
+                      print('Opção selecionada: $value');
+                    },
+                    itemBuilder: (BuildContext context) {
+                      return [
+                        PopupMenuItem<String>(
+                          value: 'Opção 1',
+                          child: Text('Conta'),
+                        ),
+                        PopupMenuItem<String>(
+                          value: 'Opção 2',
+                          child: Text('Configurações'),
+                        ),
+                        PopupMenuItem<String>(
+                          value: 'Opção 3',
+                          child: Text('Log out'),
+                        ),
+                      ];
+                    },
+                  ),
+                  SizedBox(width: 10),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                        primary: Colors.cyan,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(45))),
+                    onPressed: () {},
+                    child: Text(
+                      'App',
+                      style: TextStyle(color: Colors.white),
                     ),
                   ),
-                  backgroundColor:
-                      MaterialStateProperty.all<Color>(Colors.cyan),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.menu,
-                      color: Colors.white,
-                      size: 25,
-                    ),
-                    SizedBox(width: 5),
-                    Text(
-                      "App",
-                      style: TextStyle(
-                        fontStyle: FontStyle.italic,
-                        color: Colors.white,
-                        fontSize: 20,
-                      ),
-                    ),
-                  ],
-                ),
+                ],
               ),
             ),
           ),
@@ -192,13 +197,26 @@ class NewNavBar extends HookWidget {
         currentIndex: state.value,
         items: const [
           BottomNavigationBarItem(
-            label: "Cafés",
-            icon: Icon(Icons.coffee_outlined),
+            label: "Jogos",
+            icon: Icon(
+              Icons.games_sharp,
+              size: 25,
+            ),
           ),
           BottomNavigationBarItem(
-              label: "", icon: Icon(Icons.local_play_sharp)),
+            label: "Filmes",
+            icon: Icon(
+              Icons.local_play_sharp,
+              size: 25,
+            ),
+          ),
           BottomNavigationBarItem(
-              label: "Nações", icon: Icon(Icons.flag_outlined))
+            label: "---",
+            icon: Icon(
+              Icons.playlist_add_check_circle_sharp,
+              size: 25,
+            ),
+          )
         ]);
   }
 }
