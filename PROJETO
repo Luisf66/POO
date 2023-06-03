@@ -41,8 +41,8 @@ class DataService {
 
     tableStateNotifier.value = {
       "objects": objectsData,
-      "props": ["title", "original_language", "release_date"],
-      "columns": ["Nome", "Idioma", "Lançamento"]
+      "props": ["title", "original_language", "release_date", "poster_path"],
+      "columns": ["Nome", "Idioma", "Lançamento", "Capa"]
     };
   }
 
@@ -139,13 +139,14 @@ class MyApp extends StatelessWidget {
                   SizedBox(width: 10),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                        primary: Colors.cyan,
+                        primary: Colors.black,
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(45))),
                     onPressed: () {},
                     child: Text(
                       'App',
-                      style: TextStyle(color: Colors.white),
+                      style: TextStyle(
+                          color: Colors.white, fontStyle: FontStyle.italic),
                     ),
                   ),
                 ],
@@ -230,41 +231,47 @@ class DataTableWidget extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.vertical,
-      child: DataTable(
-        dataRowHeight: 60,
-        //dataTextStyle: TextStyle(fontStyle: FontStyle.italic),
-        columns: columnNames
-            .map(
-              (name) => DataColumn(
-                label: Expanded(
-                  child: Text(
-                    name,
-                    style: TextStyle(fontStyle: FontStyle.italic),
-                  ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: ListView.separated(
+            padding: EdgeInsets.all(10),
+            separatorBuilder: (_, __) => Divider(
+              height: 5,
+              thickness: 2,
+              indent: 10,
+              endIndent: 10,
+              color: Colors.cyanAccent,
+            ),
+            itemCount: jsonObjects.length,
+            itemBuilder: (_, index) {
+              var rowData = jsonObjects[index];
+              var title = rowData[propertyNames[0]];
+              var content = propertyNames
+                  .sublist(1)
+                  .map((prop) => rowData[prop])
+                  .join("  ");
+              return Card(
+                shadowColor: Theme.of(context).primaryColor,
+                child: Column(
+                  children: [
+                    SizedBox(height: 5),
+                    Text(
+                      "${title}\n",
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontStyle: FontStyle.italic),
+                    ),
+                    Text(content),
+                    SizedBox(height: 10),
+                  ],
                 ),
-              ),
-            )
-            .toList(),
-        rows: jsonObjects
-            .map(
-              (obj) => DataRow(
-                cells: propertyNames
-                    .map(
-                      (propName) => DataCell(
-                        Text(
-                          obj[propName] is List
-                              ? obj[propName].join(", ")
-                              : obj[propName].toString(),
-                        ),
-                      ),
-                    )
-                    .toList(),
-              ),
-            )
-            .toList(),
-      ),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 }
