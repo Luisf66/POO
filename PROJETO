@@ -17,18 +17,13 @@ class DataService {
 
   int selectedIndex = 0;
   void carregar(index) {
-    var selectedIndex = index;
-    if (index == 0) {
-      carregarCafes();
-    } else if (index == 1) {
-      carregarCervejas();
-    } else if (index == 2) {
-      carregarNacoes();
-    }
+    final funcoes = [carregarjogos, carregarfilmes, carregarNacoes];
+
+    funcoes[index]();
   }
 
-  Future<void> carregarCervejas() async {
-    var beersUri = Uri(
+  Future<void> carregarfilmes() async {
+    var filmesUri = Uri(
         scheme: 'https',
         host: 'api.themoviedb.org',
         path: '/3/discover/movie',
@@ -37,12 +32,12 @@ class DataService {
           'language': 'pt-BR'
         });
 
-    print('carregarCervejas #1 - antes do await');
-    var jsonString = await http.read(beersUri);
-    print('carregarCervejas #2 - depois do await');
-    var beersJson = jsonDecode(jsonString);
+    print('carregarfilmes #1 - antes do await');
+    var jsonString = await http.read(filmesUri);
+    print('carregarfilmes #2 - depois do await');
+    var filmesJson = jsonDecode(jsonString);
 
-    objectsData = beersJson['results'];
+    objectsData = filmesJson['results'];
 
     tableStateNotifier.value = {
       "objects": objectsData,
@@ -71,23 +66,24 @@ class DataService {
     };
   }
 
-  Future<void> carregarCafes() async {
-    var cafesUri = Uri(
+  Future<void> carregarjogos() async {
+    var jogosUri = Uri(
       scheme: 'https',
-      host: 'random-data-api.com',
-      path: 'api/coffee/random_coffee',
+      host: 'mugenmonkey.com',
+      path: 'api/v0/ds3_builds',
       queryParameters: {'size': '15'},
     );
 
-    print('carregarCafes #1 - antes do await');
-    var jsonString = await http.read(cafesUri);
-    print('carregarCafes #2 - depois do await');
-    var cafesJson = jsonDecode(jsonString);
+    print('carregarjogos #1 - antes do await');
+    var jsonString = await http.read(jogosUri);
+    print('carregarjogos #2 - depois do await');
+    var jogosJson = jsonDecode(jsonString);
+    objectsData = jogosJson['results'];
 
     tableStateNotifier.value = {
-      "objects": cafesJson,
-      "props": ["blend_name", "origin", "variety"],
-      "columns": ["Nome", "Origem", "Variedade"]
+      "objects": objectsData,
+      "props": ["title", "gender", "starting_class"],
+      "columns": ["Nome", "Gênero", "Classe"]
     };
   }
 }
