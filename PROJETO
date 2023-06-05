@@ -13,7 +13,7 @@ class DataService {
     "columns": []
   });
 
-  List<Map<String,dynamic>> objectsData = [];
+  List<dynamic> objectsData = [];
 
   int selectedIndex = 0;
   void carregar(index) {
@@ -37,15 +37,21 @@ class DataService {
     print('carregarfilmes #2 - depois do await');
     var filmesJson = jsonDecode(jsonString);
 
-    objectsData = filmesJson['results'].map((o) => {
-      ...o,
-      "poster_url": "https://image.tmdb.org/t/p/w500/${o["poster_path"]}"
+    var baseImageUrl = 'https://image.tmdb.org/t/p/w500';
+    objectsData = filmesJson['results'];
+    objectsData.forEach((film) {
+      if (film['poster_path'] != null) {
+        film['poster_path'] = baseImageUrl + film['poster_path'];
+      }
     });
-
     tableStateNotifier.value = {
       "objects": objectsData,
-      "props": ["title", "original_language", "release_date", "poster_path"],
-      "columns": ["Nome", "Idioma", "Lançamento", "Capa"]
+      "props": ["title", "original_language", "release_date"],
+      "columns": [
+        "Nome",
+        "Idioma",
+        "Lançamento",
+      ]
     };
   }
 
@@ -255,6 +261,8 @@ class DataTableWidget extends HookWidget {
                   .sublist(1)
                   .map((prop) => rowData[prop])
                   .join("  ");
+              var imageUrl = rowData['poster_path'];
+
               return Card(
                 shadowColor: Theme.of(context).primaryColor,
                 child: Column(
@@ -266,6 +274,7 @@ class DataTableWidget extends HookWidget {
                           fontWeight: FontWeight.bold,
                           fontStyle: FontStyle.italic),
                     ),
+                    imageUrl != null ? Image.network(imageUrl) : Container(),
                     Text(content),
                     SizedBox(height: 10),
                   ],
