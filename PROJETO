@@ -6,11 +6,14 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+enum TableStatus { idle, loading, ready, error }
+
 class DataService {
   final ValueNotifier<Map<String, dynamic>> tableStateNotifier = ValueNotifier({
     "objects": [],
     "props": ["name", "style", "ibu"],
-    "columns": []
+    "columns": [],
+    'status': TableStatus.idle,
   });
 
   List<dynamic> objectsData = [];
@@ -18,6 +21,16 @@ class DataService {
   int selectedIndex = 0;
   void carregar(index) {
     final funcoes = [carregarjogos, carregarfilmes, carregarNacoes];
+    tableStateNotifier.value = {
+      'status': TableStatus.loading,
+      "objects": objectsData,
+      "props": ["title", "original_language", "release_date"],
+      "columns": [
+        "Nome",
+        "Idioma",
+        "Lançamento",
+      ]
+    };
 
     funcoes[index]();
   }
@@ -45,8 +58,13 @@ class DataService {
       }
     });
     tableStateNotifier.value = {
+      'status': TableStatus.ready,
       "objects": objectsData,
-      "props": ["title", "original_language", "release_date"],
+      "props": [
+        "title",
+        "original_language",
+        "release_date",
+      ],
       "columns": [
         "Nome",
         "Idioma",
@@ -69,9 +87,18 @@ class DataService {
     var nacoesJson = jsonDecode(jsonString);
 
     tableStateNotifier.value = {
+      'status': TableStatus.ready,
       "objects": nacoesJson,
-      "props": ["nationality", "language", "capital"],
-      "columns": ["Nacionalidade", "Lingua", "Capital"]
+      "props": [
+        "nationality",
+        "language",
+        "capital",
+      ],
+      "columns": [
+        "Nacionalidade",
+        "Lingua",
+        "Capital",
+      ]
     };
   }
 
@@ -90,9 +117,18 @@ class DataService {
     objectsData = jogosJson['results'];
 
     tableStateNotifier.value = {
+      'status': TableStatus.ready,
       "objects": objectsData,
-      "props": ["key", "id", "starting_class"],
-      "columns": ["Nome", "Gênero", "Classe"]
+      "props": [
+        "key",
+        "id",
+        "starting_class",
+      ],
+      "columns": [
+        "Nome",
+        "Gênero",
+        "Classe",
+      ]
     };
   }
 }
@@ -166,14 +202,25 @@ class MyApp extends StatelessWidget {
         body: ValueListenableBuilder(
           valueListenable: dataService.tableStateNotifier,
           builder: (_, value, __) {
-            //final jsonObjects = (value["objects"] as Map<String, dynamic>).values.toList();
+            switch (value['status']) {
+              case TableStatus.idle:
+                return Text("Toque algum botão");
 
-            print(value);
-            return DataTableWidget(
-              jsonObjects: value["objects"],
-              columnNames: value["columns"] as List<dynamic>,
-              propertyNames: value["props"] as List<dynamic>,
-            );
+              case TableStatus.loading:
+                return CircularProgressIndicator();
+
+              case TableStatus.ready:
+                return DataTableWidget(
+                  jsonObjects: value["objects"],
+                  columnNames: value["columns"] as List<dynamic>,
+                  propertyNames: value["props"] as List<dynamic>,
+                );
+
+              case TableStatus.error:
+                return Text("Lascou");
+            }
+
+            return Text("...");
           },
         ),
         bottomNavigationBar: NewNavBar(
