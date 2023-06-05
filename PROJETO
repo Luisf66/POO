@@ -204,7 +204,28 @@ class MyApp extends StatelessWidget {
           builder: (_, value, __) {
             switch (value['status']) {
               case TableStatus.idle:
-                return Center(child: Text("Toque algum botão"));
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.play_arrow_rounded,
+                        size: 200,
+                        color: Colors.cyanAccent,
+                      ),
+                      SizedBox(width: 10),
+                      Text(
+                        "Toque algum botão",
+                        style: TextStyle(
+                            color: Colors.black87,
+                            fontWeight: FontWeight.bold,
+                            fontStyle: FontStyle.italic,
+                            fontFamily: 'TimesNewRoman',
+                            height: 2),
+                      ),
+                    ],
+                  ),
+                );
 
               case TableStatus.loading:
                 return Container(
@@ -257,6 +278,7 @@ class NewNavBar extends HookWidget {
             icon: Icon(
               Icons.games_sharp,
               size: 25,
+              color: Colors.cyan,
             ),
           ),
           BottomNavigationBarItem(
@@ -264,13 +286,15 @@ class NewNavBar extends HookWidget {
             icon: Icon(
               Icons.local_play_sharp,
               size: 25,
+              color: Colors.cyan,
             ),
           ),
           BottomNavigationBarItem(
-            label: "---",
+            label: "Nações",
             icon: Icon(
-              Icons.playlist_add_check_circle_sharp,
+              Icons.flag_rounded,
               size: 25,
+              color: Colors.cyan,
             ),
           )
         ]);
