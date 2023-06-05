@@ -10,10 +10,10 @@ class DataService {
   final ValueNotifier<Map<String, dynamic>> tableStateNotifier = ValueNotifier({
     "objects": [],
     "props": ["name", "style", "ibu"],
-    "columns": ["", "", ""]
+    "columns": []
   });
 
-  List<dynamic> objectsData = [];
+  List<Map<String,dynamic>> objectsData = [];
 
   int selectedIndex = 0;
   void carregar(index) {
@@ -37,7 +37,10 @@ class DataService {
     print('carregarfilmes #2 - depois do await');
     var filmesJson = jsonDecode(jsonString);
 
-    objectsData = filmesJson['results'];
+    objectsData = filmesJson['results'].map((o) => {
+      ...o,
+      "poster_url": "https://image.tmdb.org/t/p/w500/${o["poster_path"]}"
+    });
 
     tableStateNotifier.value = {
       "objects": objectsData,
@@ -82,7 +85,7 @@ class DataService {
 
     tableStateNotifier.value = {
       "objects": objectsData,
-      "props": ["title", "gender", "starting_class"],
+      "props": ["key", "id", "starting_class"],
       "columns": ["Nome", "Gênero", "Classe"]
     };
   }
