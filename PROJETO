@@ -204,10 +204,13 @@ class MyApp extends StatelessWidget {
           builder: (_, value, __) {
             switch (value['status']) {
               case TableStatus.idle:
-                return Text("Toque algum botão");
+                return Center(child: Text("Toque algum botão"));
 
               case TableStatus.loading:
-                return CircularProgressIndicator();
+                return Container(
+                  alignment: Alignment.center,
+                  child: CircularProgressIndicator(),
+                );
 
               case TableStatus.ready:
                 return DataTableWidget(
