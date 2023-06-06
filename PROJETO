@@ -349,7 +349,13 @@ class DataTableWidget extends HookWidget {
                           fontStyle: FontStyle.italic),
                     ),
                     imageUrl != null ? Image.network(imageUrl) : Container(),
-                    Text(content),
+                    //Como colocar o content em coluna
+                    Text(
+                      content,
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontStyle: FontStyle.italic),
+                    ),
                     SizedBox(height: 10),
                   ],
                 ),
