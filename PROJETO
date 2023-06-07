@@ -1,13 +1,13 @@
 //https://api.themoviedb.org/3/discover/movie?api_key=5cfcb26280fab4a3855afa602bcee3e0
 //https://mugenmonkey.com/api/v0/ds3_builds
-
+//https://api.themoviedb.org/3/discover/tv?api_key=5cfcb26280fab4a3855afa602bcee3e0
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 enum TableStatus { idle, loading, ready, error }
-
+//API
 class DataService {
   final ValueNotifier<Map<String, dynamic>> tableStateNotifier = ValueNotifier({
     "objects": [],
@@ -17,10 +17,11 @@ class DataService {
   });
 
   List<dynamic> objectsData = [];
+  int page = 1;
 
   int selectedIndex = 0;
   void carregar(index) {
-    final funcoes = [carregarjogos, carregarfilmes, carregarNacoes];
+    final funcoes = [carregarjogos, carregarfilmes, carregartv];
     tableStateNotifier.value = {
       'status': TableStatus.loading,
       "objects": objectsData,
@@ -42,7 +43,8 @@ class DataService {
         path: '/3/discover/movie',
         queryParameters: {
           'api_key': '5cfcb26280fab4a3855afa602bcee3e0',
-          'language': 'pt-BR'
+          'language': 'pt-BR',
+          'page': '$page',
         });
 
     print('carregarfilmes #1 - antes do await');
@@ -73,31 +75,41 @@ class DataService {
     };
   }
 
-  Future<void> carregarNacoes() async {
-    var nacoesUri = Uri(
-      scheme: 'https',
-      host: 'random-data-api.com',
-      path: 'api/nation/random_nation',
-      queryParameters: {'size': '15'},
-    );
+  Future<void> carregartv() async {
+    var TVUri = Uri(
+        scheme: 'https',
+        host: 'api.themoviedb.org',
+        path: '/3/discover/tv',
+        queryParameters: {
+          'api_key': '5cfcb26280fab4a3855afa602bcee3e0',
+          'language': 'pt-BR',
+          'page': '$page'
+        });
 
-    print('carregarNacoes #1 - antes do await');
-    var jsonString = await http.read(nacoesUri);
-    print('carregarNacoes #2 - depois do await');
-    var nacoesJson = jsonDecode(jsonString);
+    print('carregarTV #1 - antes do await');
+    var jsonString = await http.read(TVUri);
+    print('carregarTV #2 - depois do await');
+    var TVJson = jsonDecode(jsonString);
 
+    var baseImageUrl = 'https://image.tmdb.org/t/p/w500';
+    objectsData = TVJson['results'];
+    objectsData.forEach((film) {
+      if (film['poster_path'] != null) {
+        film['poster_path'] = baseImageUrl + film['poster_path'];
+      }
+    });
     tableStateNotifier.value = {
       'status': TableStatus.ready,
-      "objects": nacoesJson,
+      "objects": objectsData,
       "props": [
-        "nationality",
-        "language",
-        "capital",
+        "name",
+        "original_language",
+        "first_air_date",
       ],
       "columns": [
-        "Nacionalidade",
-        "Lingua",
-        "Capital",
+        "Nome",
+        "Idioma",
+        "Lançamento",
       ]
     };
   }
@@ -140,7 +152,7 @@ void main() {
 
   runApp(app);
 }
-
+//CONTEUDO DO APP
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -199,53 +211,78 @@ class MyApp extends StatelessWidget {
             ),
           ),
         ),
-        body: ValueListenableBuilder(
-          valueListenable: dataService.tableStateNotifier,
-          builder: (_, value, __) {
-            switch (value['status']) {
-              case TableStatus.idle:
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.play_arrow_rounded,
-                        size: 200,
-                        color: Colors.cyanAccent,
-                      ),
-                      SizedBox(width: 10),
-                      Text(
-                        "Toque algum botão",
-                        style: TextStyle(
-                            color: Colors.black87,
-                            fontWeight: FontWeight.bold,
-                            fontStyle: FontStyle.italic,
-                            fontFamily: 'TimesNewRoman',
-                            height: 2),
-                      ),
-                    ],
-                  ),
-                );
+        body: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                IconButton(
+                  icon: Icon(Icons.arrow_back),
+                  onPressed: () {
+                    // MUDAR O PAGE - 1
+                    //page--;
+                  },
+                ),
+                IconButton(
+                  icon: Icon(Icons.arrow_forward),
+                  onPressed: () {
+                    // MUDAR O PAGE + 1
+                    //page++;
+                  },
+                ),
+              ],
+            ),
+            Expanded(
+              child: ValueListenableBuilder(
+                valueListenable: dataService.tableStateNotifier,
+                builder: (_, value, __) {
+                  switch (value['status']) {
+                    case TableStatus.idle:
+                      return Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.play_arrow_rounded,
+                              size: 200,
+                              color: Colors.cyanAccent,
+                            ),
+                            SizedBox(width: 10),
+                            Text(
+                              "Toque algum botão",
+                              style: TextStyle(
+                                  color: Colors.black87,
+                                  fontWeight: FontWeight.bold,
+                                  fontStyle: FontStyle.italic,
+                                  fontFamily: 'TimesNewRoman',
+                                  height: 2),
+                            ),
+                          ],
+                        ),
+                      );
 
-              case TableStatus.loading:
-                return Container(
-                  alignment: Alignment.center,
-                  child: CircularProgressIndicator(),
-                );
+                    case TableStatus.loading:
+                      return Container(
+                        alignment: Alignment.center,
+                        child: CircularProgressIndicator(),
+                      );
 
-              case TableStatus.ready:
-                return DataTableWidget(
-                  jsonObjects: value["objects"],
-                  columnNames: value["columns"] as List<dynamic>,
-                  propertyNames: value["props"] as List<dynamic>,
-                );
+                    case TableStatus.ready:
+                      return DataTableWidget(
+                        jsonObjects: value["objects"],
+                        columnNames: value["columns"] as List<dynamic>,
+                        propertyNames: value["props"] as List<dynamic>,
+                      );
 
-              case TableStatus.error:
-                return Text("Lascou");
-            }
+                    case TableStatus.error:
+                      return Text("Lascou");
+                  }
 
-            return Text("...");
-          },
+                  return Text("...");
+                },
+              ),
+            ),
+          ],
         ),
         bottomNavigationBar: NewNavBar(
           itemSelectedCallback: dataService.carregar,
@@ -254,7 +291,7 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-
+//BARRA INFERIOR
 class NewNavBar extends HookWidget {
   final _itemSelectedCallback;
 
@@ -290,9 +327,9 @@ class NewNavBar extends HookWidget {
             ),
           ),
           BottomNavigationBarItem(
-            label: "Nações",
+            label: "TV",
             icon: Icon(
-              Icons.flag_rounded,
+              Icons.tv,
               size: 25,
               color: Colors.cyan,
             ),
@@ -300,7 +337,7 @@ class NewNavBar extends HookWidget {
         ]);
   }
 }
-
+//TABELA
 class DataTableWidget extends HookWidget {
   final List jsonObjects;
   final List columnNames;
