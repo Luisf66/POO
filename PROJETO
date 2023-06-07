@@ -6,15 +6,17 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-int page = 1;
+
 
 enum TableStatus { idle, loading, ready, error }
 
 //API
 class DataService {
+  int page = 1;
+
   final ValueNotifier<Map<String, dynamic>> tableStateNotifier = ValueNotifier({
     "objects": [],
-    "props": ["name", "style", "ibu"],
+    "props": [],
     "columns": [],
     'status': TableStatus.idle,
   });
@@ -22,7 +24,20 @@ class DataService {
   List<dynamic> objectsData = [];
 
   int selectedIndex = 0;
+
+  void proximaPagina(){
+    page++;
+    carregar(selectedIndex);
+  }
+
+
+  void Paginaanterior(){
+    page--;
+    carregar(selectedIndex);
+  }
+
   void carregar(index) {
+    selectedIndex = index;
     final funcoes = [carregarjogos, carregarfilmes, carregartv];
     tableStateNotifier.value = {
       'status': TableStatus.loading,
@@ -221,17 +236,11 @@ class MyApp extends StatelessWidget {
               children: [
                 IconButton(
                   icon: Icon(Icons.arrow_back),
-                  onPressed: () {
-                    // MUDAR O PAGE - 1
-                    page--;
-                  },
+                  onPressed: dataService.Paginaanterior,
                 ),
                 IconButton(
                   icon: Icon(Icons.arrow_forward),
-                  onPressed: () {
-                    // MUDAR O PAGE + 1
-                    page++;
-                  },
+                  onPressed: dataService.proximaPagina,
                 ),
               ],
             ),
@@ -391,7 +400,6 @@ class DataTableWidget extends HookWidget {
                           fontStyle: FontStyle.italic),
                     ),
                     imageUrl != null ? Image.network(imageUrl) : Container(),
-                    //Como colocar o content em coluna
                     Text(
                       content,
                       style: TextStyle(
@@ -410,7 +418,7 @@ class DataTableWidget extends HookWidget {
   }
 }
 //CLASSE CONTA
-
+/*
 class MyCustomForm extends StatefulWidget {
   const MyCustomForm({super.key});
 
@@ -541,3 +549,4 @@ class Botao_2 extends StatelessWidget {
     );
   }
 }
+*/
