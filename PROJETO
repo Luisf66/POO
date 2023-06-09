@@ -27,11 +27,17 @@ class DataService {
 
   void proximaPagina() {
     page++;
+    if (page >= 42) {
+      page = 42;
+    }
     carregar(selectedIndex);
   }
 
   void Paginaanterior() {
     page--;
+    if (page <= 0) {
+      page = 1;
+    }
     carregar(selectedIndex);
   }
 
@@ -173,7 +179,41 @@ void main() {
   runApp(app);
 }
 
-void tela_conta() {}
+class botaogeral extends StatelessWidget {
+  final ValueNotifier<bool> showAccountScreenNotifier;
+
+  const botaogeral({
+    required this.showAccountScreenNotifier,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return PopupMenuButton<String>(
+      onSelected: (value) {
+        print('Opção selecionada: $value');
+        if (value == 'Opção 1') {
+          showAccountScreenNotifier.value = true;
+        }
+      },
+      itemBuilder: (BuildContext context) {
+        return [
+          PopupMenuItem<String>(
+            value: 'Opção 1',
+            child: Text('Conta'),
+          ),
+          PopupMenuItem<String>(
+            value: 'Opção 2',
+            child: Text('Configurações'),
+          ),
+          PopupMenuItem<String>(
+            value: 'Opção 3',
+            child: Text('Log out'),
+          ),
+        ];
+      },
+    );
+  }
+}
 
 //CONTEUDO DO APP
 class MyApp extends StatelessWidget {
@@ -198,30 +238,9 @@ class MyApp extends StatelessWidget {
                         width: 70,
                         child: Row(
                           children: [
-                            PopupMenuButton<String>(
-                              onSelected: (value) {
-                                print('Opção selecionada: $value');
-                                if (value == 'Opção 1') {
-                                  showAccountScreenNotifier.value = true;
-                                }
-                              },
-                              itemBuilder: (BuildContext context) {
-                                return [
-                                  PopupMenuItem<String>(
-                                    value: 'Opção 1',
-                                    child: Text('Conta'),
-                                  ),
-                                  PopupMenuItem<String>(
-                                    value: 'Opção 2',
-                                    child: Text('Configurações'),
-                                  ),
-                                  PopupMenuItem<String>(
-                                    value: 'Opção 3',
-                                    child: Text('Log out'),
-                                  ),
-                                ];
-                              },
-                            ),
+                            botaogeral(
+                                showAccountScreenNotifier:
+                                    showAccountScreenNotifier),
                             SizedBox(width: 10),
                             ElevatedButton(
                               style: ElevatedButton.styleFrom(
@@ -254,30 +273,9 @@ class MyApp extends StatelessWidget {
                         width: 70,
                         child: Row(
                           children: [
-                            PopupMenuButton<String>(
-                              onSelected: (value) {
-                                print('Opção selecionada: $value');
-                                if (value == 'Opção 1') {
-                                  showAccountScreenNotifier.value = true;
-                                }
-                              },
-                              itemBuilder: (BuildContext context) {
-                                return [
-                                  PopupMenuItem<String>(
-                                    value: 'Opção 1',
-                                    child: Text('Conta'),
-                                  ),
-                                  PopupMenuItem<String>(
-                                    value: 'Opção 2',
-                                    child: Text('Configurações'),
-                                  ),
-                                  PopupMenuItem<String>(
-                                    value: 'Opção 3',
-                                    child: Text('Log out'),
-                                  ),
-                                ];
-                              },
-                            ),
+                            botaogeral(
+                                showAccountScreenNotifier:
+                                    showAccountScreenNotifier),
                             SizedBox(width: 10),
                             ElevatedButton(
                               style: ElevatedButton.styleFrom(
@@ -359,7 +357,6 @@ class MyApp extends StatelessWidget {
                               case TableStatus.error:
                                 return Text("Lascou");
                             }
-
                             return Text("...");
                           },
                         ),
