@@ -6,9 +6,9 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-
-
 enum TableStatus { idle, loading, ready, error }
+
+final showAccountScreenNotifier = ValueNotifier(false);
 
 //API
 class DataService {
@@ -25,13 +25,12 @@ class DataService {
 
   int selectedIndex = 0;
 
-  void proximaPagina(){
+  void proximaPagina() {
     page++;
     carregar(selectedIndex);
   }
 
-
-  void Paginaanterior(){
+  void Paginaanterior() {
     page--;
     carregar(selectedIndex);
   }
@@ -83,11 +82,13 @@ class DataService {
         "title",
         "original_language",
         "release_date",
+        "vote_average",
       ],
       "columns": [
         "Nome",
         "Idioma",
         "Lançamento",
+        "Nota",
       ]
     };
   }
@@ -122,11 +123,13 @@ class DataService {
         "name",
         "original_language",
         "first_air_date",
+        "vote_average",
       ],
       "columns": [
         "Nome",
         "Idioma",
         "Lançamento",
+        "Nota",
       ]
     };
   }
@@ -175,132 +178,150 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData(
-        primarySwatch: Colors.cyan,
-        fontFamily: 'TimesNewRoman',
-      ),
-      debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        backgroundColor: Colors.white,
-        appBar: PreferredSize(
-          preferredSize: Size.fromHeight(kToolbarHeight),
-          child: Container(
-            color: Colors.transparent,
-            child: Container(
-              width: 70,
-              child: Row(
-                children: [
-                  PopupMenuButton<String>(
-                    onSelected: (value) {
-                      print('Opção selecionada: $value');
-                    },
-                    itemBuilder: (BuildContext context) {
-                      return [
-                        PopupMenuItem<String>(
-                          value: 'Opção 1',
-                          child: Text('Conta'),
-                        ),
-                        PopupMenuItem<String>(
-                          value: 'Opção 2',
-                          child: Text('Configurações'),
-                        ),
-                        PopupMenuItem<String>(
-                          value: 'Opção 3',
-                          child: Text('Log out'),
-                        ),
-                      ];
-                    },
-                  ),
-                  SizedBox(width: 10),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                        primary: Colors.black,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(45))),
-                    onPressed: () {},
-                    child: Text(
-                      'App',
-                      style: TextStyle(
-                          color: Colors.white, fontStyle: FontStyle.italic),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
+        theme: ThemeData(
+          primarySwatch: Colors.cyan,
+          fontFamily: 'TimesNewRoman',
         ),
-        body: Column(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                IconButton(
-                  icon: Icon(Icons.arrow_back),
-                  onPressed: dataService.Paginaanterior,
-                ),
-                IconButton(
-                  icon: Icon(Icons.arrow_forward),
-                  onPressed: dataService.proximaPagina,
-                ),
-              ],
-            ),
-            Expanded(
-              child: ValueListenableBuilder(
-                valueListenable: dataService.tableStateNotifier,
-                builder: (_, value, __) {
-                  switch (value['status']) {
-                    case TableStatus.idle:
-                      return Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
+        debugShowCheckedModeBanner: false,
+        home: ValueListenableBuilder<bool>(
+            valueListenable: showAccountScreenNotifier,
+            builder: (_, value, __) {
+              if (value) {
+                return Scaffold(
+                  appBar: AppBar(
+                    title: Text('Conta'),
+                  ),
+                  body: MyCustomForm(),
+                );
+              } else {
+                return Scaffold(
+                  backgroundColor: Colors.white,
+                  appBar: PreferredSize(
+                    preferredSize: Size.fromHeight(kToolbarHeight),
+                    child: Container(
+                      color: Colors.transparent,
+                      child: Container(
+                        width: 70,
+                        child: Row(
                           children: [
-                            Icon(
-                              Icons.play_arrow_rounded,
-                              size: 200,
-                              color: Colors.cyanAccent,
+                            PopupMenuButton<String>(
+                              onSelected: (value) {
+                                print('Opção selecionada: $value');
+                                if (value == 'Opção 1') {
+                                  showAccountScreenNotifier.value = true;
+                                }
+                              },
+                              itemBuilder: (BuildContext context) {
+                                return [
+                                  PopupMenuItem<String>(
+                                    value: 'Opção 1',
+                                    child: Text('Conta'),
+                                  ),
+                                  PopupMenuItem<String>(
+                                    value: 'Opção 2',
+                                    child: Text('Configurações'),
+                                  ),
+                                  PopupMenuItem<String>(
+                                    value: 'Opção 3',
+                                    child: Text('Log out'),
+                                  ),
+                                ];
+                              },
                             ),
                             SizedBox(width: 10),
-                            Text(
-                              "Toque algum botão",
-                              style: TextStyle(
-                                  color: Colors.black87,
-                                  fontWeight: FontWeight.bold,
-                                  fontStyle: FontStyle.italic,
-                                  fontFamily: 'TimesNewRoman',
-                                  height: 2),
+                            ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                  primary: Colors.black,
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(45))),
+                              onPressed: () {},
+                              child: Text(
+                                'App',
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontStyle: FontStyle.italic),
+                              ),
                             ),
                           ],
                         ),
-                      );
+                      ),
+                    ),
+                  ),
+                  body: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          IconButton(
+                            icon: Icon(Icons.arrow_back),
+                            onPressed: dataService.Paginaanterior,
+                          ),
+                          IconButton(
+                            icon: Icon(Icons.arrow_forward),
+                            onPressed: dataService.proximaPagina,
+                          ),
+                        ],
+                      ),
+                      Expanded(
+                        child: ValueListenableBuilder(
+                          valueListenable: dataService.tableStateNotifier,
+                          builder: (_, value, __) {
+                            switch (value['status']) {
+                              case TableStatus.idle:
+                                return Center(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        Icons.play_arrow_rounded,
+                                        size: 200,
+                                        color: Colors.cyanAccent,
+                                      ),
+                                      SizedBox(width: 10),
+                                      Text(
+                                        "Toque algum botão",
+                                        style: TextStyle(
+                                            color: Colors.black87,
+                                            fontWeight: FontWeight.bold,
+                                            fontStyle: FontStyle.italic,
+                                            fontFamily: 'TimesNewRoman',
+                                            height: 2),
+                                      ),
+                                    ],
+                                  ),
+                                );
 
-                    case TableStatus.loading:
-                      return Container(
-                        alignment: Alignment.center,
-                        child: CircularProgressIndicator(),
-                      );
+                              case TableStatus.loading:
+                                return Container(
+                                  alignment: Alignment.center,
+                                  child: CircularProgressIndicator(),
+                                );
 
-                    case TableStatus.ready:
-                      return DataTableWidget(
-                        jsonObjects: value["objects"],
-                        columnNames: value["columns"] as List<dynamic>,
-                        propertyNames: value["props"] as List<dynamic>,
-                      );
+                              case TableStatus.ready:
+                                return DataTableWidget(
+                                  jsonObjects: value["objects"],
+                                  columnNames:
+                                      value["columns"] as List<dynamic>,
+                                  propertyNames:
+                                      value["props"] as List<dynamic>,
+                                );
 
-                    case TableStatus.error:
-                      return Text("Lascou");
-                  }
+                              case TableStatus.error:
+                                return Text("Lascou");
+                            }
 
-                  return Text("...");
-                },
-              ),
-            ),
-          ],
-        ),
-        bottomNavigationBar: NewNavBar(
-          itemSelectedCallback: dataService.carregar,
-        ),
-      ),
-    );
+                            return Text("...");
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                  bottomNavigationBar: NewNavBar(
+                    itemSelectedCallback: dataService.carregar,
+                  ),
+                );
+              }
+            }));
   }
 }
 
@@ -417,8 +438,7 @@ class DataTableWidget extends HookWidget {
     );
   }
 }
-//CLASSE CONTA
-/*
+
 class MyCustomForm extends StatefulWidget {
   const MyCustomForm({super.key});
 
@@ -430,7 +450,6 @@ class MyCustomForm extends StatefulWidget {
 
 class MyCustomFormState extends State<MyCustomForm> {
   final _formKey = GlobalKey<FormState>();
-
   @override
   Widget build(BuildContext context) {
     return Form(
@@ -456,10 +475,6 @@ class MyCustomFormState extends State<MyCustomForm> {
             decoration: InputDecoration(
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(68.0),
-                //borderSide: BorderSide(
-                //  color: Colors.red,
-                //  width: 10,
-                //)
               ),
               labelText: 'Idade',
             ),
@@ -517,6 +532,8 @@ class Botao_1 extends StatelessWidget {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Finalizado')),
             );
+            dataService.carregar(1);
+            showAccountScreenNotifier.value = false;
           }
         },
         child: const Text('Confirmar'),
@@ -540,13 +557,14 @@ class Botao_2 extends StatelessWidget {
           bool a = true;
           if (a = true) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Enviado...')),
+              const SnackBar(content: Text('Retornando...')),
             );
+            dataService.carregar(1);
+            showAccountScreenNotifier.value = false;
           }
         },
-        child: const Text('Enviar'),
+        child: const Text('Cancelar'),
       ),
     );
   }
 }
-*/
