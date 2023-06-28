@@ -39,7 +39,9 @@ class MyApp extends StatelessWidget {
                         child: DataTableWidget(
                             jsonObjects: value['dataObjects'],
                             propertyNames: value['propertyNames'],
-                            columnNames: value['columnNames']));
+                            columnNames: value['columnNames'],
+                            funcaocallback: dataService.ordenarEstadoAtual,
+                            ));
 
                   case TableStatus.error:
                     return Text("Lascou");
@@ -83,7 +85,11 @@ class NewNavBar extends HookWidget {
   }
 }
 
+void _vazio(String,bool){}
+
 class DataTableWidget extends StatelessWidget {
+  // usar função de callback para remover o dataService.ordenarEstadoAtual(propertyNames[columnIndex]),
+  final _funcaocallback;
   final List jsonObjects;
 
   final List<String> columnNames;
@@ -93,15 +99,16 @@ class DataTableWidget extends StatelessWidget {
   DataTableWidget(
       {this.jsonObjects = const [],
       this.columnNames = const [],
-      this.propertyNames = const []});
+      this.propertyNames = const [],funcaocallback}): _funcaocallback = funcaocallback ?? _vazio;
 
   @override
   Widget build(BuildContext context) {
     return DataTable(
         columns: columnNames
             .map((name) => DataColumn(
+              //funcaocallback(propertyNames[columnIndex],ascending);
                 onSort: (columnIndex, ascending) =>
-                    dataService.ordenarEstadoAtual(propertyNames[columnIndex]),
+                    _funcaocallback(propertyNames[columnIndex],ascending),
                 label: Expanded(
                     child: Text(name,
                         style: TextStyle(fontStyle: FontStyle.italic)))))
