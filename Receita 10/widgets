@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-
 import 'package:flutter_hooks/flutter_hooks.dart';
-
 import '../data/data_service.dart';
 
 class MyApp extends StatelessWidget {
@@ -30,23 +28,19 @@ class MyApp extends StatelessWidget {
                 switch (value['status']) {
                   case TableStatus.idle:
                     return Center(child: Text("Toque em algum botão"));
-
                   case TableStatus.loading:
                     return Center(child: CircularProgressIndicator());
-
                   case TableStatus.ready:
                     return SingleChildScrollView(
                         child: DataTableWidget(
-                            jsonObjects: value['dataObjects'],
-                            propertyNames: value['propertyNames'],
-                            columnNames: value['columnNames'],
-                            funcaocallback: dataService.ordenarEstadoAtual,
-                            ));
-
+                      jsonObjects: value['dataObjects'],
+                      propertyNames: value['propertyNames'],
+                      columnNames: value['columnNames'],
+                      sortCallback: dataService.ordenarEstadoAtual,
+                    ));
                   case TableStatus.error:
                     return Text("Lascou");
                 }
-
                 return Text("...");
               }),
           bottomNavigationBar:
@@ -57,7 +51,6 @@ class MyApp extends StatelessWidget {
 
 class NewNavBar extends HookWidget {
   final _itemSelectedCallback;
-
   NewNavBar({itemSelectedCallback})
       : _itemSelectedCallback = itemSelectedCallback ?? (int) {}
 
@@ -68,7 +61,6 @@ class NewNavBar extends HookWidget {
     return BottomNavigationBar(
         onTap: (index) {
           state.value = index;
-
           _itemSelectedCallback(index);
         },
         currentIndex: state.value,
@@ -85,30 +77,30 @@ class NewNavBar extends HookWidget {
   }
 }
 
-void _vazio(String,bool){}
+void _empty(String, bool) {}
 
 class DataTableWidget extends StatelessWidget {
-  // usar função de callback para remover o dataService.ordenarEstadoAtual(propertyNames[columnIndex]),
-  final _funcaocallback;
+  final _sortCallback;
   final List jsonObjects;
-
   final List<String> columnNames;
-
   final List<String> propertyNames;
 
   DataTableWidget(
       {this.jsonObjects = const [],
       this.columnNames = const [],
-      this.propertyNames = const [],funcaocallback}): _funcaocallback = funcaocallback ?? _vazio;
+      this.propertyNames = const [],
+      sortCallback})
+      : _sortCallback = sortCallback ?? _empty;
 
   @override
   Widget build(BuildContext context) {
     return DataTable(
         columns: columnNames
             .map((name) => DataColumn(
-              //funcaocallback(propertyNames[columnIndex],ascending);
                 onSort: (columnIndex, ascending) =>
-                    _funcaocallback(propertyNames[columnIndex],ascending),
+                    _sortCallback(propertyNames[columnIndex], ascending)
+                //dataService.ordenarEstadoAtual(propertyNames[columnIndex]),
+                ,
                 label: Expanded(
                     child: Text(name,
                         style: TextStyle(fontStyle: FontStyle.italic)))))
