@@ -23,266 +23,156 @@ import 'package:http/http.dart' as http;
 
 import 'dart:convert';
 
+import '../util/ordenador.dart';
 
+enum TableStatus { idle, loading, ready, error }
 
-enum TableStatus{idle,loading,ready,error}
+enum ItemType {
+  beer,
+  coffee,
+  nation,
+  none;
 
-enum ItemType{beer, coffee, nation, none}
+  String get asString => '$name';
 
+  List<String> get columns => this == coffee
+      ? ["Nome", "Origem", "Tipo"]
+      : this == beer
+          ? ["Nome", "Estilo", "IBU"]
+          : this == nation
+              ? ["Nome", "Capital", "Idioma", "Esporte"]
+              : [];
 
-class DataService{
+  List<String> get properties => this == coffee
+      ? ["blend_name", "origin", "variety"]
+      : this == beer
+          ? ["name", "style", "ibu"]
+          : this == nation
+              ? ["nationality", "capital", "language", "national_sport"]
+              : [];
+}
 
-
-
+class DataService {
   static const MAX_N_ITEMS = 15;
 
   static const MIN_N_ITEMS = 3;
 
   static const DEFAULT_N_ITEMS = 7;
 
-  
-
   int _numberOfItems = DEFAULT_N_ITEMS;
 
-
-
-  set numberOfItems(n){
-
-    _numberOfItems = n < 0 ? MIN_N_ITEMS: n > MAX_N_ITEMS? MAX_N_ITEMS: n;
-
+  set numberOfItems(n) {
+    _numberOfItems = n < 0
+        ? MIN_N_ITEMS
+        : n > MAX_N_ITEMS
+            ? MAX_N_ITEMS
+            : n;
   }
 
-  
+  final ValueNotifier<Map<String, dynamic>> tableStateNotifier = ValueNotifier({
+    'status': TableStatus.idle,
+    'dataObjects': [],
+    'itemType': ItemType.none
+  });
 
-  final ValueNotifier<Map<String,dynamic>> tableStateNotifier 
+  void carregar(index) {
+    final params = [ItemType.coffee, ItemType.beer, ItemType.nation];
 
-                            = ValueNotifier({
-
-                              'status':TableStatus.idle,
-
-                              'dataObjects':[],
-
-                              'itemType': ItemType.none
-
-                            });
-
-  
-
-  void carregar(index){
-
-    final funcoes = [carregarCafes, carregarCervejas, carregarNacoes];
-
-    funcoes[index]();
-
+    carregarPorTipo(params[index]);
   }
 
+  void ordenarEstadoAtual(String propriedade) {
+    List objetos = tableStateNotifier.value['dataObjects'] ?? [];
 
+    if (objetos == []) return;
 
-  void carregarCafes(){
+    Ordenador ord = Ordenador();
 
-    //ignorar solicitação se uma requisição já estiver em curso
+    var objetosOrdenados = [];
 
-    if (tableStateNotifier.value['status'] == TableStatus.loading) return;
+    final type = tableStateNotifier.value['itemType'];
 
-    if (tableStateNotifier.value['itemType'] != ItemType.coffee){
-
-      tableStateNotifier.value = {
-
-        'status': TableStatus.loading,
-
-        'dataObjects': [],
-
-        'itemType': ItemType.coffee
-
-      };
-
+    if (type == ItemType.beer && propriedade == "name") {
+      objetosOrdenados = ord.ordenarCervejasPorNomeCrescente(objetos);
+    } else if (type == ItemType.beer && propriedade == "style") {
+      objetosOrdenados = ord.ordenarCervejasPorEstiloCrescente(objetos);
     }
 
-
-
-    var coffeesUri = Uri(
-
-      scheme: 'https',
-
-      host: 'random-data-api.com',
-
-      path: 'api/coffee/random_coffee',
-
-      queryParameters: {'size': '$_numberOfItems'});
-
-
-
-    http.read(coffeesUri).then( (jsonString){
-
-      var coffeesJson = jsonDecode(jsonString);  
-
-      
-
-      //se já houver cafés no estado da tabela...
-
-      if (tableStateNotifier.value['status'] != TableStatus.loading) coffeesJson = [...tableStateNotifier.value['dataObjects'], ...coffeesJson];
-
-      
-
-      tableStateNotifier.value = {
-
-        'itemType': ItemType.coffee,
-
-        'status': TableStatus.ready,
-
-        'dataObjects': coffeesJson,
-
-        'propertyNames': ["blend_name","origin","variety"],
-
-        'columnNames': ["Nome", "Origem", "Tipo"]
-
-      };
-
-    });
-
-    
-
+    emitirEstadoOrdenado(objetosOrdenados, propriedade);
   }
 
+  Uri montarUri(ItemType type) {
+    return Uri(
+        scheme: 'https',
+        host: 'random-data-api.com',
+        path: 'api/${type.asString}/random_${type.asString}',
+        queryParameters: {'size': '$_numberOfItems'});
+  }
 
+  Future<List<dynamic>> acessarApi(Uri uri) async {
+    var jsonString = await http.read(uri);
 
-  void carregarNacoes(){
+    var json = jsonDecode(jsonString);
 
+    json = [...tableStateNotifier.value['dataObjects'], ...json];
+
+    return json;
+  }
+
+  void emitirEstadoOrdenado(List objetosOrdenados, String propriedade) {
+    var estado = tableStateNotifier.value;
+
+    estado['dataObjects'] = objetosOrdenados;
+
+    estado['sortCriteria'] = propriedade;
+
+    estado['ascending'] = true;
+
+    tableStateNotifier.value = estado;
+  }
+
+  void emitirEstadoCarregando(ItemType type) {
+    tableStateNotifier.value = {
+      'status': TableStatus.loading,
+      'dataObjects': [],
+      'itemType': type
+    };
+  }
+
+  void emitirEstadoPronto(ItemType type, var json) {
+    tableStateNotifier.value = {
+      'itemType': type,
+      'status': TableStatus.ready,
+      'dataObjects': json,
+      'propertyNames': type.properties,
+      'columnNames': type.columns
+    };
+  }
+
+  bool temRequisicaoEmCurso() =>
+      tableStateNotifier.value['status'] == TableStatus.loading;
+
+  bool mudouTipoDeItemRequisitado(ItemType type) =>
+      tableStateNotifier.value['itemType'] != type;
+
+  void carregarPorTipo(ItemType type) async {
     //ignorar solicitação se uma requisição já estiver em curso
 
-    if (tableStateNotifier.value['status'] == TableStatus.loading) return;
+    if (temRequisicaoEmCurso()) return;
 
-    if (tableStateNotifier.value['itemType'] != ItemType.nation){
-
-      tableStateNotifier.value = {
-
-        'status': TableStatus.loading,
-
-        'dataObjects': [],
-
-        'itemType': ItemType.nation
-
-      };
-
+    if (mudouTipoDeItemRequisitado(type)) {
+      emitirEstadoCarregando(type);
     }
 
+    var uri = montarUri(type);
 
+    var json = await acessarApi(uri); //, type);
 
-    var nationsUri = Uri(
-
-      scheme: 'https',
-
-      host: 'random-data-api.com',
-
-      path: 'api/nation/random_nation',
-
-      queryParameters: {'size': '$_numberOfItems'});
-
-
-
-    http.read(nationsUri).then( (jsonString){
-
-      var nationsJson = jsonDecode(jsonString);
-
-
-
-      //se já houver nações no estado da tabela...
-
-      if (tableStateNotifier.value['status'] != TableStatus.loading) nationsJson = [...tableStateNotifier.value['dataObjects'], ...nationsJson];
-
-
-
-      tableStateNotifier.value = {
-
-        'itemType': ItemType.nation,
-
-        'status': TableStatus.ready,
-
-        'dataObjects': nationsJson,
-
-        'propertyNames': ["nationality","capital","language","national_sport"],
-
-        'columnNames': ["Nome", "Capital", "Idioma","Esporte"]
-
-      };
-
-    });
-
+    emitirEstadoPronto(type, json);
   }
-
-
-
-  void carregarCervejas(){
-
-    //ignorar solicitação se uma requisição já estiver em curso
-
-    if (tableStateNotifier.value['status'] == TableStatus.loading) return;
-
-    //emitir estado loading se items em exibição não forem cervejas
-
-    if (tableStateNotifier.value['itemType'] != ItemType.beer){
-
-      tableStateNotifier.value = {
-
-        'status': TableStatus.loading,
-
-        'dataObjects': [],
-
-        'itemType': ItemType.beer
-
-      };
-
-    } 
-
-    
-
-
-
-    var beersUri = Uri(
-
-      scheme: 'https',
-
-      host: 'random-data-api.com',
-
-      path: 'api/beer/random_beer',
-
-      queryParameters: {'size': '$_numberOfItems'});
-
-
-
-    http.read(beersUri).then( (jsonString){
-
-      var beersJson = jsonDecode(jsonString);
-
-      
-
-      //se já houver cervejas no estado da tabela...
-
-      if (tableStateNotifier.value['status'] != TableStatus.loading) beersJson = [...tableStateNotifier.value['dataObjects'], ...beersJson];
-
-
-
-      tableStateNotifier.value = {
-
-        'itemType': ItemType.beer,
-
-        'status': TableStatus.ready,
-
-        'dataObjects': beersJson,
-
-        'propertyNames': ["name","style","ibu"],
-
-        'columnNames': ["Nome", "Estilo", "IBU"]
-
-      };
-
-    });
-
-    
-
-  }
-
 }
+
+final dataService = DataService();
 
 //widgets.dart
 
@@ -293,233 +183,284 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import '../data/data_service.dart';
 
 class MyApp extends StatelessWidget {
-
-
-
   @override
-
   Widget build(BuildContext context) {
-
     return MaterialApp(
-
-      theme: ThemeData(primarySwatch: Colors.deepPurple),
-
-      debugShowCheckedModeBanner:false,
-
-      home: Scaffold(
-
-        appBar: AppBar( 
-
-          title: const Text("Dicas"),
-
-          actions:[
-
+        theme: ThemeData(primarySwatch: Colors.deepPurple),
+        debugShowCheckedModeBanner: false,
+        home: Scaffold(
+          appBar: AppBar(title: const Text("Dicas"), actions: [
             PopupMenuButton(
-
-              itemBuilder: (_) => [3,7,15].map(
-
-                (num) => PopupMenuItem(
-
-                  value: num,
-
-                  child: Text("Carregar $num itens por vez"),
-
-
-
-                ) 
-
-              ).toList(),
-
-              onSelected: (number){
-
+              itemBuilder: (_) => [3, 7, 15]
+                  .map((num) => PopupMenuItem(
+                        value: num,
+                        child: Text("Carregar $num itens por vez"),
+                      ))
+                  .toList(),
+              onSelected: (number) {
                 dataService.numberOfItems = number;
-
               },
-
-
-
             )
+          ]),
+          body: ValueListenableBuilder(
+              valueListenable: dataService.tableStateNotifier,
+              builder: (_, value, __) {
+                switch (value['status']) {
+                  case TableStatus.idle:
+                    return Center(child: Text("Toque em algum botão"));
 
-          ] 
+                  case TableStatus.loading:
+                    return Center(child: CircularProgressIndicator());
 
-          ),
+                  case TableStatus.ready:
+                    return SingleChildScrollView(
+                        child: DataTableWidget(
+                            jsonObjects: value['dataObjects'],
+                            propertyNames: value['propertyNames'],
+                            columnNames: value['columnNames']));
 
-        body: ValueListenableBuilder(
+                  case TableStatus.error:
+                    return Text("Lascou");
+                }
 
-          valueListenable: dataService.tableStateNotifier,
-
-          builder:(_, value, __){
-
-            switch (value['status']){
-
-              case TableStatus.idle: 
-
-                return Center(child: Text("Toque em algum botão"));
-
-              case TableStatus.loading:
-
-                return Center(child: CircularProgressIndicator());
-
-              case TableStatus.ready: 
-
-                return SingleChildScrollView(child: DataTableWidget(
-
-                  jsonObjects: value['dataObjects'], 
-
-                  propertyNames: value['propertyNames'], 
-
-                  columnNames: value['columnNames']
-
-                )) ;
-
-              case TableStatus.error: 
-
-                return Text("Lascou");
-
-            }
-
-            return Text("...");
-
-            
-
-          }
-
-        ),
-
-        bottomNavigationBar: NewNavBar(itemSelectedCallback: dataService.carregar),
-
-      ));
-
+                return Text("...");
+              }),
+          bottomNavigationBar:
+              NewNavBar(itemSelectedCallback: dataService.carregar),
+        ));
   }
-
 }
-
-
-
-
 
 class NewNavBar extends HookWidget {
-
   final _itemSelectedCallback;
 
-  NewNavBar({itemSelectedCallback}):
-
-    _itemSelectedCallback = itemSelectedCallback ?? (int){}
-
-    
-
-
+  NewNavBar({itemSelectedCallback})
+      : _itemSelectedCallback = itemSelectedCallback ?? (int) {}
 
   @override
-
   Widget build(BuildContext context) {
-
     var state = useState(1);
 
-    
-
     return BottomNavigationBar(
+        onTap: (index) {
+          state.value = index;
 
-      onTap: (index){
-
-        state.value = index;
-
-        _itemSelectedCallback(index);                
-
-      }, 
-
-      currentIndex: state.value,
-
-      items: const [
-
-        BottomNavigationBarItem(
-
-          label: "Cafés",
-
-          icon: Icon(Icons.coffee_outlined),
-
-        ),
-
-
-
-        BottomNavigationBarItem(
-
-            label: "Cervejas", icon: Icon(Icons.local_drink_outlined)),
-
-
-
-        BottomNavigationBarItem(
-
-          label: "Nações", icon: Icon(Icons.flag_outlined))
-
-      ]);
-
-
-
+          _itemSelectedCallback(index);
+        },
+        currentIndex: state.value,
+        items: const [
+          BottomNavigationBarItem(
+            label: "Cafés",
+            icon: Icon(Icons.coffee_outlined),
+          ),
+          BottomNavigationBarItem(
+              label: "Cervejas", icon: Icon(Icons.local_drink_outlined)),
+          BottomNavigationBarItem(
+              label: "Nações", icon: Icon(Icons.flag_outlined))
+        ]);
   }
-
-
-
 }
 
-
-
-
-
 class DataTableWidget extends StatelessWidget {
-
-
-
   final List jsonObjects;
 
   final List<String> columnNames;
 
   final List<String> propertyNames;
 
-
-
-  DataTableWidget( {this.jsonObjects = const [], this.columnNames = const [], this.propertyNames= const []});
-
-
+  DataTableWidget(
+      {this.jsonObjects = const [],
+      this.columnNames = const [],
+      this.propertyNames = const []});
 
   @override
-
   Widget build(BuildContext context) {
-
     return DataTable(
+        columns: columnNames
+            .map((name) => DataColumn(
+                onSort: (columnIndex, ascending) =>
+                    dataService.ordenarEstadoAtual(propertyNames[columnIndex]),
+                label: Expanded(
+                    child: Text(name,
+                        style: TextStyle(fontStyle: FontStyle.italic)))))
+            .toList(),
+        rows: jsonObjects
+            .map((obj) => DataRow(
+                cells: propertyNames
+                    .map((propName) => DataCell(Text(obj[propName])))
+                    .toList()))
+            .toList());
+  }
+}
 
-      columns: columnNames.map( 
+//ordenador
 
-                (name) => DataColumn(
+class Ordenador {
+  List ordenarCervejasPorNomeCrescente(List cervejas) {
+    List cervejasOrdenadas = List.of(cervejas);
 
-                  label: Expanded(
+    bool trocouAoMenosUm;
 
-                    child: Text(name, style: TextStyle(fontStyle: FontStyle.italic))
+    do {
+      trocouAoMenosUm = false;
 
-                  )
+      for (int i = 0; i < cervejasOrdenadas.length - 1; i++) {
+        var atual = cervejasOrdenadas[i];
 
-                )
+        var proximo = cervejasOrdenadas[i + 1];
 
-              ).toList()       
+        if (atual["name"].compareTo(proximo["name"]) > 0) {
+          var aux = cervejasOrdenadas[i];
 
-      ,
+          cervejasOrdenadas[i] = cervejasOrdenadas[i + 1];
 
-      rows: jsonObjects.map( 
+          cervejasOrdenadas[i + 1] = aux;
 
-        (obj) => DataRow(
+          trocouAoMenosUm = true;
+        }
+      }
+    } while (trocouAoMenosUm);
 
-            cells: propertyNames.map(
-
-              (propName) => DataCell(Text(obj[propName]))
-
-            ).toList()
-
-          )
-
-        ).toList());
-
+    return cervejasOrdenadas;
   }
 
+  List ordenarCervejasPorNomeDecrescente(List cervejas) {
+    List cervejasOrdenadas = List.of(cervejas);
 
+    bool trocouAoMenosUm;
 
+    do {
+      trocouAoMenosUm = false;
+
+      for (int i = 0; i < cervejasOrdenadas.length - 1; i++) {
+        var atual = cervejasOrdenadas[i];
+
+        var proximo = cervejasOrdenadas[i + 1];
+
+        if (atual["name"].compareTo(proximo["name"]) > 0) {
+          var aux = cervejasOrdenadas[i];
+
+          cervejasOrdenadas[i] = cervejasOrdenadas[i + 1];
+
+          cervejasOrdenadas[i + 1] = aux;
+
+          trocouAoMenosUm = true;
+        }
+      }
+    } while (trocouAoMenosUm);
+
+    return cervejasOrdenadas;
+  }
+
+  List ordenarCervejasPorEstiloCrescente(List cervejas) {
+    List cervejasOrdenadas = List.of(cervejas);
+
+    bool trocouAoMenosUm;
+
+    do {
+      trocouAoMenosUm = false;
+
+      for (int i = 0; i < cervejasOrdenadas.length - 1; i++) {
+        var atual = cervejasOrdenadas[i];
+
+        var proximo = cervejasOrdenadas[i + 1];
+
+        if (atual["style"].compareTo(proximo["style"]) > 0) {
+          var aux = cervejasOrdenadas[i];
+
+          cervejasOrdenadas[i] = cervejasOrdenadas[i + 1];
+
+          cervejasOrdenadas[i + 1] = aux;
+
+          trocouAoMenosUm = true;
+        }
+      }
+    } while (trocouAoMenosUm);
+
+    return cervejasOrdenadas;
+  }
+
+  List ordenarCervejasPorEstiloDecrescente(List cervejas) {
+    List cervejasOrdenadas = List.of(cervejas);
+
+    bool trocouAoMenosUm;
+
+    do {
+      trocouAoMenosUm = false;
+
+      for (int i = 0; i < cervejasOrdenadas.length - 1; i++) {
+        var atual = cervejasOrdenadas[i];
+
+        var proximo = cervejasOrdenadas[i + 1];
+
+        if (atual["style"].compareTo(proximo["style"]) > 0) {
+          var aux = cervejasOrdenadas[i];
+
+          cervejasOrdenadas[i] = cervejasOrdenadas[i + 1];
+
+          cervejasOrdenadas[i + 1] = aux;
+
+          trocouAoMenosUm = true;
+        }
+      }
+    } while (trocouAoMenosUm);
+
+    return cervejasOrdenadas;
+  }
+
+  List ordenarCervejasPorIBUcrescente(List cervejas) {
+    List cervejasOrdenadas = List.of(cervejas);
+
+    bool trocouAoMenosUm;
+
+    do {
+      trocouAoMenosUm = false;
+
+      for (int i = 0; i < cervejasOrdenadas.length - 1; i++) {
+        var atual = cervejasOrdenadas[i];
+
+        var proximo = cervejasOrdenadas[i + 1];
+
+        if (atual["ibu"].compareTo(proximo["ibu"]) > 0) {
+          var aux = cervejasOrdenadas[i];
+
+          cervejasOrdenadas[i] = cervejasOrdenadas[i + 1];
+
+          cervejasOrdenadas[i + 1] = aux;
+
+          trocouAoMenosUm = true;
+        }
+      }
+    } while (trocouAoMenosUm);
+
+    return cervejasOrdenadas;
+  }
+
+  List ordenarCervejasPorIBUdecrescente(List cervejas) {
+    List cervejasOrdenadas = List.of(cervejas);
+
+    bool trocouAoMenosUm;
+
+    do {
+      trocouAoMenosUm = false;
+
+      for (int i = 0; i < cervejasOrdenadas.length - 1; i++) {
+        var atual = cervejasOrdenadas[i];
+
+        var proximo = cervejasOrdenadas[i + 1];
+
+        if (atual["ibu"].compareTo(proximo["ibu"]) > 0) {
+          var aux = cervejasOrdenadas[i];
+
+          cervejasOrdenadas[i] = cervejasOrdenadas[i + 1];
+
+          cervejasOrdenadas[i + 1] = aux;
+
+          trocouAoMenosUm = true;
+        }
+      }
+    } while (trocouAoMenosUm);
+
+    return cervejasOrdenadas;
+  }
 }
