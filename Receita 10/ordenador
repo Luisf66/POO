@@ -1,9 +1,9 @@
 abstract class Decididor {
-  bool precisaTrocarAtualPeloProximo(dynamic atual, dynamic proximo);
+  bool realizartroca(dynamic atual, dynamic proximo);
 }
 
 class Ordenador {
-  List ordenarFuderoso(List objetos, Decididor decididor) {
+  List metodoordenar(List objetos, Decididor decididor) {
     List objetosOrdenados = List.of(objetos);
 
     bool trocouAoMenosUm;
@@ -16,7 +16,7 @@ class Ordenador {
 
         var proximo = objetosOrdenados[i + 1];
 
-        if (decididor.precisaTrocarAtualPeloProximo(atual, proximo)) {
+        if (decididor.realizartroca(atual, proximo)) {
           var aux = objetosOrdenados[i];
 
           objetosOrdenados[i] = objetosOrdenados[i + 1];
