@@ -33,12 +33,12 @@ enum ItemType {
               : [];
 }
 
-class ChamaOrdenador extends Decididor {
+class TrocaDeElementos extends Decididor {
   final String propriedade;
 
   final bool crescente;
 
-  ChamaOrdenador(this.propriedade, [this.crescente = true]);
+  TrocaDeElementos(this.propriedade, [this.crescente = true]);
 
   @override
   bool realizartroca(atual, proximo) {
@@ -83,16 +83,13 @@ class DataService {
     carregarPorTipo(params[index]);
   }
 
-  void ordenarEstadoAtual(final String propriedade) {
+  void ordenarEstadoAtual(final String propriedade, [bool crescente = true]) {
+    print("$propriedade -- $crescente");
     List objetos = tableStateNotifier.value['dataObjects'] ?? [];
-
     if (objetos == []) return;
-
     Ordenador ord = Ordenador();
-
-    Decididor d = ChamaOrdenador(propriedade);
-
-    var objetosOrdenados = ord.metodoordenar(objetos, d);
+    Decididor d = TrocaDeElementos(propriedade, crescente);
+    var objetosOrdenados = ord.ordenadorabstrato(objetos, d);
 
     emitirEstadoOrdenado(objetosOrdenados, propriedade);
   }
