@@ -33,15 +33,15 @@ enum ItemType {
               : [];
 }
 
-class FuncionarioDoMes extends Decididor {
+class ChamaOrdenador extends Decididor {
   final String propriedade;
 
   final bool crescente;
 
-  FuncionarioDoMes(this.propriedade, [this.crescente = true]);
+  ChamaOrdenador(this.propriedade, [this.crescente = true]);
 
   @override
-  bool precisaTrocarAtualPeloProximo(atual, proximo) {
+  bool realizartroca(atual, proximo) {
     try {
       final ordemCorreta = crescente ? [atual, proximo] : [proximo, atual];
 
@@ -90,9 +90,9 @@ class DataService {
 
     Ordenador ord = Ordenador();
 
-    Decididor d = FuncionarioDoMes(propriedade);
+    Decididor d = ChamaOrdenador(propriedade);
 
-    var objetosOrdenados = ord.ordenarFuderoso(objetos, d);
+    var objetosOrdenados = ord.metodoordenar(objetos, d);
 
     emitirEstadoOrdenado(objetosOrdenados, propriedade);
   }
