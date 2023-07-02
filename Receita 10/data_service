@@ -69,25 +69,25 @@ class DecididorCervejaEstiloDecrescente extends Decididor {
 enum TableStatus { idle, loading, ready, error }
 
 enum ItemType {
-  beer,
-  coffee,
-  nation,
+  users,
+  blood_types,
+  banks,
   none;
 
   String get asString => '$name';
-  List<String> get columns => this == coffee
+  List<String> get columns => this == blood_types
       ? ["Nome", "Origem", "Tipo"]
-      : this == beer
+      : this == users
           ? ["Nome", "Estilo", "IBU"]
-          : this == nation
+          : this == banks
               ? ["Nome", "Capital", "Idioma", "Esporte"]
               : [];
-  List<String> get properties => this == coffee
-      ? ["blend_name", "origin", "variety"]
-      : this == beer
-          ? ["name", "style", "ibu"]
-          : this == nation
-              ? ["nationality", "capital", "language", "national_sport"]
+  List<String> get properties => this == blood_types
+      ? ["group", "rh_factor", "type"]
+      : this == users
+          ? ["first_name", "username", "password"]
+          : this == banks
+              ? ["account_number", "bank_name", "routing_number", "swift_bic"]
               : [];
 }
 
@@ -113,7 +113,7 @@ class DataService {
   });
 
   void carregar(index) {
-    final params = [ItemType.coffee, ItemType.beer, ItemType.nation];
+    final params = [ItemType.blood_types, ItemType.users, ItemType.banks];
     carregarPorTipo(params[index]);
   }
 
@@ -132,7 +132,7 @@ class DataService {
     return Uri(
         scheme: 'https',
         host: 'random-data-api.com',
-        path: 'api/${type.asString}/random_${type.asString}',
+        path: 'api/v2/${type.asString}',
         queryParameters: {'size': '$_numberOfItems'});
   }
 
