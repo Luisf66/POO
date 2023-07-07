@@ -104,12 +104,12 @@ class DataTableWidget extends StatelessWidget {
   final highlight;
 
   TextSpan _makeRichText(String text) {
-    final String searchTerm =
-        dataService.tableStateNotifier.value['searchTerm'] ?? '';
+    final String searchTerm = dataService.searchTerm;
     if (searchTerm.isEmpty) {
       return TextSpan(text: text);
     }
-    return _makeRichTextWithHighlight(text, searchTerm);
+    return dataService.makeRichText(
+        text, searchTerm); // Utiliza a função `makeRichText` do `DataService`
   }
 
   TextSpan _makeRichTextWithHighlight(String text, String highlight) {
