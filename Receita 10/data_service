@@ -113,6 +113,8 @@ class DataService {
     carregarPorTipo(tableStateNotifier.value['itemType']);
   }
 
+  String get searchTerm => _searchTerm;
+
 //////FILTRAGEM
   List<dynamic> filtrarDadosPorBusca(List<dynamic> dados, String termoBusca) {
     if (termoBusca.isEmpty) {
@@ -142,23 +144,6 @@ class DataService {
       }).toList(),
     );
   }
-
-  /////TESTE////////////////
-  void verificarCorrespondencia(String searchTerm) async {
-    final List<dynamic> dados = tableStateNotifier.value['dataObjects'];
-
-    for (var obj in dados) {
-      for (var prop in obj.values) {
-        if (prop.toString().toLowerCase() == searchTerm.toLowerCase()) {
-          print("PRESENTE");
-          return;
-        }
-      }
-    }
-
-    print("NÃO ENCONTRADO");
-  }
-  ///////////////////////////////////////////////////////////////////////
 
   final ValueNotifier<Map<String, dynamic>> tableStateNotifier = ValueNotifier({
     'status': TableStatus.idle,
@@ -244,8 +229,12 @@ class DataService {
       uri = uri.replace(
           queryParameters: {'size': '$_numberOfItems', 'search': _searchTerm});
     }
-    var json = await acessarApi(uri); //, type);
-    emitirEstadoPronto(type, json);
+    var json = await acessarApi(uri);
+    var dadosFiltrados =
+        filtrarDadosPorBusca(json, _searchTerm); // Aplica a filtragem dos dados
+
+    emitirEstadoPronto(
+        type, dadosFiltrados); // Atualiza o estado com os dados filtrados
   }
 }
 
