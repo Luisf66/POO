@@ -9,19 +9,37 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(primarySwatch: Colors.deepPurple),
         debugShowCheckedModeBanner: false,
         home: Scaffold(
-          appBar: AppBar(title: const Text("Dicas"), actions: [
-            PopupMenuButton(
-              itemBuilder: (_) => [3, 7, 15]
-                  .map((num) => PopupMenuItem(
-                        value: num,
-                        child: Text("Carregar $num itens por vez"),
-                      ))
-                  .toList(),
-              onSelected: (number) {
-                dataService.numberOfItems = number;
-              },
-            )
-          ]),
+          appBar: AppBar(
+              title: Row(
+                children: [
+                  Text("Dicas"),
+                  SizedBox(width: 10),
+                  Expanded(
+                    child: TextField(
+                      onChanged: (value) {
+                        dataService.searchTerm = value;
+                      },
+                      decoration: InputDecoration(
+                        hintText: 'Buscar...',
+                        border: InputBorder.none,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                PopupMenuButton(
+                  itemBuilder: (_) => [3, 7, 15]
+                      .map((num) => PopupMenuItem(
+                            value: num,
+                            child: Text("Carregar $num itens por vez"),
+                          ))
+                      .toList(),
+                  onSelected: (number) {
+                    dataService.numberOfItems = number;
+                  },
+                )
+              ]),
           body: ValueListenableBuilder(
               valueListenable: dataService.tableStateNotifier,
               builder: (_, value, __) {
@@ -33,7 +51,7 @@ class MyApp extends StatelessWidget {
                   case TableStatus.ready:
                     return SingleChildScrollView(
                         child: DataTableWidget(
-                      jsonObjects: value['dataObjects'],
+                      jsonObjects: value['dataObjects'] ?? [],
                       propertyNames: value['propertyNames'],
                       columnNames: value['columnNames'],
                       sortCallback: dataService.ordenarEstadoAtual,
@@ -66,13 +84,12 @@ class NewNavBar extends HookWidget {
         currentIndex: state.value,
         items: const [
           BottomNavigationBarItem(
-            label: "Cafés",
-            icon: Icon(Icons.coffee_outlined),
+            label: "Sangue",
+            icon: Icon(Icons.bloodtype),
           ),
           BottomNavigationBarItem(
-              label: "Cervejas", icon: Icon(Icons.local_drink_outlined)),
-          BottomNavigationBarItem(
-              label: "Nações", icon: Icon(Icons.flag_outlined))
+              label: "Contas", icon: Icon(Icons.account_box)),
+          BottomNavigationBarItem(label: "Banco", icon: Icon(Icons.food_bank))
         ]);
   }
 }
@@ -84,11 +101,37 @@ class DataTableWidget extends StatelessWidget {
   final List jsonObjects;
   final List<String> columnNames;
   final List<String> propertyNames;
+  final highlight;
+
+  TextSpan _makeRichText(String text) {
+    final String searchTerm =
+        dataService.tableStateNotifier.value['searchTerm'] ?? '';
+    if (searchTerm.isEmpty) {
+      return TextSpan(text: text);
+    }
+    return _makeRichTextWithHighlight(text, searchTerm);
+  }
+
+  TextSpan _makeRichTextWithHighlight(String text, String highlight) {
+    final List<String> splitted = text.split(highlight);
+    List<TextSpan> textSpans = [];
+    for (int i = 0; i < splitted.length; i++) {
+      if (splitted[i].isNotEmpty) {
+        textSpans.add(TextSpan(text: splitted[i]));
+      }
+      if (i < splitted.length - 1) {
+        textSpans.add(TextSpan(
+            text: highlight, style: TextStyle(fontWeight: FontWeight.bold)));
+      }
+    }
+    return TextSpan(children: textSpans);
+  }
 
   DataTableWidget(
       {this.jsonObjects = const [],
       this.columnNames = const [],
       this.propertyNames = const [],
+      this.highlight,
       sortCallback})
       : _sortCallback = sortCallback ?? _empty;
 
