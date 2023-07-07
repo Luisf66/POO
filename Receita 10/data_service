@@ -76,11 +76,11 @@ enum ItemType {
 
   String get asString => '$name';
   List<String> get columns => this == blood_types
-      ? ["Nome", "Origem", "Tipo"]
+      ? ["Grupo", "RH", "Tipo"]
       : this == users
-          ? ["Nome", "Estilo", "IBU"]
+          ? ["Nome", "Nick", "Senha"]
           : this == banks
-              ? ["Nome", "Capital", "Idioma", "Esporte"]
+              ? ["Conta", "Nome", "ID", "Swift Bic"]
               : [];
   List<String> get properties => this == blood_types
       ? ["group", "rh_factor", "type"]
@@ -105,6 +105,60 @@ class DataService {
             ? MAX_N_ITEMS
             : n;
   }
+
+////BUSCA
+  String _searchTerm = '';
+  set searchTerm(String term) {
+    _searchTerm = term;
+    carregarPorTipo(tableStateNotifier.value['itemType']);
+  }
+
+//////FILTRAGEM
+  List<dynamic> filtrarDadosPorBusca(List<dynamic> dados, String termoBusca) {
+    if (termoBusca.isEmpty) {
+      return dados;
+    }
+
+    return dados.where((obj) {
+      for (var prop in obj.values) {
+        if (prop.toString().toLowerCase().contains(termoBusca.toLowerCase())) {
+          return true;
+        }
+      }
+      return false;
+    }).toList();
+  }
+
+  TextSpan makeRichText(String text, String highlight) {
+    final List<String> splitted = text.split(highlight);
+    return TextSpan(
+      children: splitted.map((s) {
+        if (s == "") {
+          return TextSpan(
+              text: highlight, style: TextStyle(fontWeight: FontWeight.bold));
+        } else {
+          return TextSpan(text: s);
+        }
+      }).toList(),
+    );
+  }
+
+  /////TESTE////////////////
+  void verificarCorrespondencia(String searchTerm) async {
+    final List<dynamic> dados = tableStateNotifier.value['dataObjects'];
+
+    for (var obj in dados) {
+      for (var prop in obj.values) {
+        if (prop.toString().toLowerCase() == searchTerm.toLowerCase()) {
+          print("PRESENTE");
+          return;
+        }
+      }
+    }
+
+    print("NÃO ENCONTRADO");
+  }
+  ///////////////////////////////////////////////////////////////////////
 
   final ValueNotifier<Map<String, dynamic>> tableStateNotifier = ValueNotifier({
     'status': TableStatus.idle,
@@ -160,12 +214,16 @@ class DataService {
   }
 
   void emitirEstadoPronto(ItemType type, var json) {
+    var searchTerm = tableStateNotifier.value['searchTerm'] ?? '';
+    var dadosFiltrados = filtrarDadosPorBusca(json, searchTerm);
+
     tableStateNotifier.value = {
       'itemType': type,
       'status': TableStatus.ready,
-      'dataObjects': json,
+      'dataObjects': dadosFiltrados,
       'propertyNames': type.properties,
-      'columnNames': type.columns
+      'columnNames': type.columns,
+      'searchTerm': searchTerm,
     };
   }
 
@@ -176,11 +234,16 @@ class DataService {
 
   void carregarPorTipo(ItemType type) async {
     //ignorar solicitação se uma requisição já estiver em curso
+
     if (temRequisicaoEmCurso()) return;
     if (mudouTipoDeItemRequisitado(type)) {
       emitirEstadoCarregando(type);
     }
     var uri = montarUri(type);
+    if (_searchTerm.isNotEmpty) {
+      uri = uri.replace(
+          queryParameters: {'size': '$_numberOfItems', 'search': _searchTerm});
+    }
     var json = await acessarApi(uri); //, type);
     emitirEstadoPronto(type, json);
   }
