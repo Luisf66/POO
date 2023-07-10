@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../util/ordenador.dart';
+import './models.dart';
 
 class FuncionarioDoMes extends Decididor {
   final String propriedade;
@@ -95,6 +96,10 @@ class DataService {
   static const MAX_N_ITEMS = 15;
   static const MIN_N_ITEMS = 3;
   static const DEFAULT_N_ITEMS = 7;
+
+  Beer beerData = Beer();
+  Coffee coffeeData = Coffee();
+  Nation nationData = Nation();
 
   int _numberOfItems = DEFAULT_N_ITEMS;
 
@@ -202,6 +207,19 @@ class DataService {
     var searchTerm = tableStateNotifier.value['searchTerm'] ?? '';
     var dadosFiltrados = filtrarDadosPorBusca(json, searchTerm);
 
+    Map<String, dynamic>? dataObject = null;
+    if (dadosFiltrados.isNotEmpty) {
+      dataObject = dadosFiltrados[0];
+    }
+
+    if (type == ItemType.blood_types) {
+      beerData.copy(dataObject!);
+    } else if (type == ItemType.users) {
+      coffeeData.copy(dataObject!);
+    } else if (type == ItemType.banks) {
+      nationData.copy(dataObject!);
+    }
+
     tableStateNotifier.value = {
       'itemType': type,
       'status': TableStatus.ready,
@@ -218,8 +236,6 @@ class DataService {
       tableStateNotifier.value['itemType'] != type;
 
   void carregarPorTipo(ItemType type) async {
-    //ignorar solicitação se uma requisição já estiver em curso
-
     if (temRequisicaoEmCurso()) return;
     if (mudouTipoDeItemRequisitado(type)) {
       emitirEstadoCarregando(type);
@@ -230,11 +246,19 @@ class DataService {
           queryParameters: {'size': '$_numberOfItems', 'search': _searchTerm});
     }
     var json = await acessarApi(uri);
-    var dadosFiltrados =
-        filtrarDadosPorBusca(json, _searchTerm); // Aplica a filtragem dos dados
+    var dadosFiltrados = filtrarDadosPorBusca(json, _searchTerm);
 
-    emitirEstadoPronto(
-        type, dadosFiltrados); // Atualiza o estado com os dados filtrados
+    if (type == ItemType.blood_types) {
+      // Atribuir dados a beerData
+      beerData.copy(dadosFiltrados[0]);
+    } else if (type == ItemType.users) {
+      // Atribuir dados a coffeeData
+      coffeeData.copy(dadosFiltrados[0]);
+    } else if (type == ItemType.banks) {
+      // Atribuir dados a nationData
+      nationData.copy(dadosFiltrados[0]);
+    }
+    emitirEstadoPronto(type, dadosFiltrados);
   }
 }
 
